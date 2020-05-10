@@ -55,16 +55,50 @@ clf.fit(X, Y)
 Y_pred = clf.predict(X)
 
 # get scores
-print("Accuracy:")
+print("Train Accuracy:")
 print(accuracy_score(Y, Y_pred))
 
-print("Macro F:")
+print("Train Macro F:")
 print(f1_score(Y, Y_pred, average="macro"))
 
-test_BOW_sents, test_all_extra_feats, Y_test, ids_test = get_features(
+# preprocess development set
+# BUG :: ValueError: X has 371 features per sample; expecting 1750
+#%%
+# Get BOW
+BOW_sents_dev, all_extra_feats_dev, Y_dev, ids_dev = get_features(
     all_data, whichset="development"
 )
+
+cv = CountVectorizer()
+
+cv_fit = cv.fit_transform(BOW_sents_dev)
+
+BOW_features_dev = cv_fit.toarray()
+
+# Append features
+X_dev = []
+for i in range(len(BOW_features_dev)):
+    line = list(BOW_features_dev[i]) + all_extra_feats_dev[i]
+    X_dev.append(line)
+
+# scale
+# scl = StandardScaler()
+# X = scl.fit_transform(X)
+# fit classifier
+
+Y_dev_pred = clf.predict(X_dev)
+
+# get scores
+print("dev Accuracy:")
+print(accuracy_score(Y_dev, Y_dev_pred))
+
+print("dev Macro F:")
+print(f1_score(Y_dev, Y_dev_pred, average="macro"))
+
 # preprocess testing set
+test_BOW_sents, test_all_extra_feats, Y_test, ids_test = get_features(
+    all_data, whichset="testing"
+)
 
 test_cv_fit = cv.transform(test_BOW_sents)
 test_BOW_features = test_cv_fit.toarray()

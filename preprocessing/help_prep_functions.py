@@ -7,6 +7,7 @@ from nltk.corpus import stopwords
 import re
 from copy import deepcopy
 import gensim
+
 #%%
 
 
@@ -16,30 +17,34 @@ def str_to_wordlist(tweettext, tweet, remove_stopwords=False):
     if remove_stopwords:
         stops = set(stopwords.words("english"))
         words = [w for w in words if w not in stops]
-    return(words)
+    return words
+
 
 def loadW2vModel():
     # LOAD PRETRAINED MODEL
     global model_GN
-    print ("Loading the model")
+    print("Loading the model")
     model_GN = gensim.models.KeyedVectors.load_word2vec_format(
-                    '/Users/Helen/Documents/PhD/Pre-trained WORD2VEC/GoogleNews-vectors-negative300.bin', binary=True)
-    print ("Done!")
+        "../data/GoogleNews-vectors-negative300.bin", binary=True
+    )
+    print("Done!")
+
 
 def sumw2v(tweet, avg=True):
     global model_GN
     model = model_GN
     num_features = 300
     temp_rep = np.zeros(num_features)
-    wordlist = str_to_wordlist(tweet['text'], tweet, remove_stopwords=False)
+    wordlist = str_to_wordlist(tweet["text"], tweet, remove_stopwords=False)
     for w in range(len(wordlist)):
         if wordlist[w] in model:
             temp_rep += model[wordlist[w]]
     if avg and len(wordlist) != 0:
-        sumw2v = temp_rep/len(wordlist)
+        sumw2v = temp_rep / len(wordlist)
     else:
         sumw2v = temp_rep
     return sumw2v
+
 
 def getW2vCosineSimilarity(words, wordssrc):
     global model_GN
@@ -54,4 +59,4 @@ def getW2vCosineSimilarity(words, wordssrc):
             wordssrc2.append(word)
     if len(words2) > 0 and len(wordssrc2) > 0:
         return model.n_similarity(words2, wordssrc2)
-    return 0.
+    return 0.0

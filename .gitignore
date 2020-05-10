@@ -123,6 +123,8 @@ pyvenv.cfg
 
 # Project specific stuff
 data/*
+nltk_data/
+preprocessing/saved_dataRumEval2019/
 
 # Spyder project settings
 .spyderproject

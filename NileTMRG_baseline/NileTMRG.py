@@ -7,54 +7,28 @@ Created on Tue Jun 27 17:00:31 2017
 """
 
 import logging
-import numpy as np
-from optparse import OptionParser
 import sys
+from optparse import OptionParser
 from time import time
-import matplotlib.pyplot as plt
 
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn import metrics
 from sklearn.datasets import fetch_20newsgroups
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_extraction.text import HashingVectorizer
-from sklearn.feature_selection import SelectFromModel
-from sklearn.feature_selection import SelectKBest, chi2
-from sklearn.linear_model import RidgeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_extraction.text import HashingVectorizer, TfidfVectorizer
+from sklearn.feature_selection import SelectFromModel, SelectKBest, chi2
+from sklearn.linear_model import (PassiveAggressiveClassifier, Perceptron,
+                                  RidgeClassifier, SGDClassifier)
+from sklearn.naive_bayes import BernoulliNB, ComplementNB, MultinomialNB
+from sklearn.neighbors import KNeighborsClassifier, NearestCentroid
 from sklearn.pipeline import Pipeline
 from sklearn.svm import LinearSVC
-from sklearn.linear_model import SGDClassifier
-from sklearn.linear_model import Perceptron
-from sklearn.linear_model import PassiveAggressiveClassifier
-from sklearn.naive_bayes import BernoulliNB, ComplementNB, MultinomialNB
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.neighbors import NearestCentroid
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.utils.extmath import density
-from sklearn import metrics
 
 ##
 
-import os
-import numpy as np
-import json
-import gensim
-import nltk
-import re
-from nltk.corpus import stopwords
-from copy import deepcopy
-import pickle
-from nltk.tokenize import TweetTokenizer
-from sklearn.svm import SVC
-from sklearn.svm import LinearSVC
-from sklearn.linear_model import SGDClassifier
-from sklearn.metrics import accuracy_score, f1_score
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.gaussian_process import GaussianProcessClassifier
-from sklearn.gaussian_process.kernels import RBF
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import confusion_matrix
-from preprocess import read_data
-from preprocess import get_features
-
+c
 ####
 # Display progress logs on stdout
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")

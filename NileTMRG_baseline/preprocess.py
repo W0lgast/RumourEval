@@ -1,11 +1,3 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jun 28 10:42:26 2017
-
-@author: Helen
-"""
-
 import json
 import os
 import numpy as np
@@ -20,7 +12,6 @@ from nltk.tokenize import TweetTokenizer
 from sklearn.svm import LinearSVC
 from sklearn.metrics import accuracy_score
 from sklearn.feature_extraction.text import CountVectorizer
-
 from preprocessing_tweets import load_dataset, load_true_labels
 from preprocessing_reddit import load_data
 

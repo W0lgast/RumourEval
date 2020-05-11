@@ -1,20 +1,10 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Jun 27 17:00:31 2017
-
-@author: Helen
-"""
-
 import logging
 import sys
 from optparse import OptionParser
 from time import time
-
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn import metrics
-from sklearn.datasets import fetch_20newsgroups
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import HashingVectorizer, TfidfVectorizer
 from sklearn.feature_selection import SelectFromModel, SelectKBest, chi2
@@ -29,6 +19,7 @@ from sklearn.neighbors import KNeighborsClassifier, NearestCentroid
 from sklearn.pipeline import Pipeline
 from sklearn.svm import LinearSVC
 from sklearn.utils.extmath import density
+from preprocess import *
 
 ####
 # Display progress logs on stdout
@@ -201,28 +192,28 @@ if not opts.sklearn:
 
     # get scores
     print("Train Accuracy:")
-    print(accuracy_score(Y, Y_pred))
+    print(metrics.accuracy_score(Y, Y_pred))
 
     print("Train Macro F:")
-    print(f1_score(Y, Y_pred, average="macro"))
+    print(metrics.f1_score(Y, Y_pred, average="macro"))
 
     Y_dev_pred = clf.predict(X_dev)
 
     # get scores
     print("dev Accuracy:")
-    print(accuracy_score(Y_dev, Y_dev_pred))
+    print(metrics.accuracy_score(Y_dev, Y_dev_pred))
 
     print("dev Macro F:")
-    print(f1_score(Y_dev, Y_dev_pred, average="macro"))
+    print(metrics.f1_score(Y_dev, Y_dev_pred, average="macro"))
 
     # Y_pred = clf.predict(X_test)
 
     # get scores
     # print "Accuracy:"
-    # print accuracy_score(Y_test, Y_pred)
+    # print metrics.accuracy_score(Y_test, Y_pred)
     #
     # print "Macro F:"
-    # print f1_score(Y_test, Y_pred, average='macro')
+    # print metrics.f1_score(Y_test, Y_pred, average='macro')
     #
     # print confusion_matrix(Y_test, Y_pred)
 

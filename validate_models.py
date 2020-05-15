@@ -37,8 +37,8 @@ print("Loaded veracity model")
 path = 'preprocessing/saved_dataRumEval2019'
 x_train = np.load(os.path.join(path, 'train/train_array.npy'), allow_pickle=True)
 y_train = np.load(os.path.join(path, 'train/labels.npy'), allow_pickle=True)
-x_dev = np.load(os.path.join(path, 'dev/train_array.npy'), allow_pickle=True)
-y_dev = np.load(os.path.join(path, 'dev/labels.npy'), allow_pickle=True)
+x_val = np.load(os.path.join(path, 'dev/train_array.npy'), allow_pickle=True)
+y_val = np.load(os.path.join(path, 'dev/labels.npy'), allow_pickle=True)
 x_test = np.load(os.path.join(path, 'test/train_array.npy'), allow_pickle=True)
 y_test = np.load(os.path.join(path, 'test/labels.npy'), allow_pickle=True)
 #ids_test = np.load(os.path.join(path, 'test/ids.npy'), allow_pickle=True)
@@ -48,16 +48,20 @@ stance_model.compile(loss='binary_crossentropy', optimizer='rmsprop',
                      metrics=['accuracy'])
 
 train_preds = prediction_to_label(veracity_model.predict(x_train))
-dev_preds = prediction_to_label(veracity_model.predict(x_dev))
+val_preds = prediction_to_label(veracity_model.predict(x_val))
 test_preds = prediction_to_label(veracity_model.predict(x_test))
 
-for name, true, pred in zip(["Training set", "Dev set", "Test set"],
-                            [y_train, y_dev, y_test],
-                            [train_preds, dev_preds, test_preds]):
+for name, true, pred in zip(["Training set", "val set", "Test set"],
+                            [y_train, y_val, y_test],
+                            [train_preds, val_preds, test_preds]):
     mse = mean_squared_error(true, pred, squared=False)
     f1 = f1_score(true, pred, labels=[0, 1, 2], average="macro")
-    msg = "For " + name + ", f1 score is " + str(f1) + ". root mse is " + str(mse) + "."
-    print(msg)
+    acc = accuracy_score(true, pred)
+    print("#-----------------------------------------------------------------------------")
+    print("CALCULATING FOR " + name)
+    print("F1 score is " + str(f1))
+    print("RMSE is " + str(mse))
+    print("Accuracy is " + str(acc))
 #score = stance_model.evaluate(x_test, y_test, verbose=0)
 #print("%s: %.2f%%" % (stance_model.metrics_names[1], score[1]*100))
 

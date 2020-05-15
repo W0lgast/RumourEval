@@ -1,8 +1,12 @@
 
 from numpy.random import seed
 seed(364)
-from tensorflow import set_random_seed
-set_random_seed(364)
+try:
+    from tensorflow import set_random_seed
+    set_random_seed(364)
+except:
+    import tensorflow
+    tensorflow.random.set_seed(364)
 from parameter_search import parameter_search
 from objective_functions import objective_function_stance_branchLSTM_RumEv
 from objective_functions import objective_function_veracity_branchLSTM_RumEv

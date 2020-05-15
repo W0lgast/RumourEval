@@ -10,8 +10,8 @@ Main function has parameter that can be changed:
 feats can be either 'text' for 'avgw2v' representation of the tweets or SemEvalfeatures for additional extra features concatenated with avgw2v.
 
 """
-from preprocessing_tweets import load_dataset
-from preprocessing_reddit import load_data
+from preprocessing_tweets import load_dataset, load_test_data_twitter
+from preprocessing_reddit import load_data, load_test_data_reddit
 from transform_feature_dict import transform_feature_dict
 from extract_thread_features import extract_thread_features_incl_response
 import help_prep_functions
@@ -34,17 +34,27 @@ def convert_label(label):
 
 
 def prep_pipeline(dataset="RumEval2019", feature_set=["avgw2v"]):
-
+    use_reddit_data = True
     path = "saved_data" + dataset
     folds = {}
     folds = load_dataset()
     reddit = load_data()
 
-    folds["train"].extend(reddit["train"])
-    folds["dev"].extend(reddit["dev"])
-    folds["test"].extend(reddit["test"])
+    #folds["train"].extend(reddit["train"])
+    #folds["dev"].extend(reddit["dev"])
+    #folds["test"].extend(reddit["test"])
+
+    folds["test"] = load_test_data_twitter()["test"]
+    if use_reddit_data:
+        reddit = load_data()
+        folds['train'].extend(reddit['train'])
+        folds['dev'].extend(reddit['dev'])
+        reddit_test_data = load_test_data_reddit()['test']
+        folds["test"].extend(reddit_test_data)
 
     help_prep_functions.loadW2vModel()
+
+    ###
 
     #%%
     for fold in folds.keys():

@@ -5,10 +5,10 @@ This file contains function to load tweets
 """
 import os
 import json
-from tree2branches import tree2branches
+from preprocessing.tree2branches import tree2branches
 
 #%%
-
+PATH_TO_TEST_TWITTER = "../data/test/twitter-en-test-data"
 
 def load_true_labels():
 
@@ -30,7 +30,98 @@ def load_true_labels():
 
     return tweet_label_dict, veracity_label_dict
 
-
+def load_test_data_twitter(set_path=PATH_TO_TEST_TWITTER):
+    allconv = []
+    train_dev_split = {}
+    train_dev_split['dev'] = []
+    train_dev_split['train'] = []
+    train_dev_split['test'] = []
+    tweet_data = sorted(os.listdir(set_path))
+    newfolds = [i for i in tweet_data if i[0] != '.']
+    tweet_data = newfolds  # conversation ids, source post id == conversation id
+    conversation = {}
+    # build conversations for tweet group
+    for tweet_topic in tweet_data:
+        path = os.path.join(set_path, tweet_topic)
+        tweet_topic_data = sorted(os.listdir(path))
+        tweet_topic_data = [i for i in tweet_topic_data if i[0] != '.']
+        for foldr in tweet_topic_data:
+            flag = 0
+            conversation['id'] = foldr
+            tweets = []
+            path_repl = path + '/' + foldr + '/replies'
+            files_t = sorted(os.listdir(path_repl))
+            newfolds = [i for i in files_t if i[0] != '.']
+            files_t = newfolds
+            flag = "test"
+            if files_t != []:
+                # iterate over json reply files
+                for repl_file in files_t:
+                    with open(os.path.join(path_repl, repl_file)) as f:
+                        for line in f:
+                            tw = json.loads(line)
+                            tw['used'] = 0
+                            tw['set'] = flag
+                            tweets.append(tw)
+                            if tw['text'] is None:
+                                print("Tweet has no text", tw['id'])
+                conversation['replies'] = tweets
+                path_src = path + '/' + foldr + '/source-tweet'
+                files_t = sorted(os.listdir(path_src))
+                with open(os.path.join(path_src, files_t[0])) as f:
+                    for line in f:
+                        src = json.loads(line)
+                        src['used'] = 0
+                        scrcid = src['id_str']
+                        src['set'] = flag
+                conversation['source'] = src
+                if src['text'] is None:
+                    print("Tweet has no text", src['id'])
+                path_struct = path + '/' + foldr + '/structure.json'
+                with open(path_struct) as f:
+                    for line in f:
+                        struct = json.loads(line)
+                if len(struct) > 1:
+                    new_struct = {}
+                    new_struct[foldr] = struct[foldr]
+                    struct = new_struct
+                    # Take item from structure if key is same as source tweet id
+                conversation['structure'] = struct
+                branches = tree2branches(conversation['structure'])
+                conversation['branches'] = branches
+                train_dev_split[flag].append(conversation.copy())
+                allconv.append(conversation.copy())
+            # if no replies are present, still add just source
+            else:
+                flag = 'test'
+                path_src = path + '/' + foldr + '/source-tweet'
+                files_t = sorted(os.listdir(path_src))
+                with open(os.path.join(path_src, files_t[0])) as f:
+                    for line in f:
+                        src = json.loads(line)
+                        src['used'] = 0
+                        scrcid = src['id_str']
+                        src['set'] = flag
+                conversation['source'] = src
+                if src['text'] is None:
+                    print("Tweet has no text", src['id'])
+                path_struct = path + '/' + foldr + '/structure.json'
+                with open(path_struct) as f:
+                    for line in f:
+                        struct = json.loads(line)
+                if len(struct) > 1:
+                    # print "Structure has more than one root"
+                    new_struct = {}
+                    new_struct[foldr] = struct[foldr]
+                    struct = new_struct
+                    # Take item from structure if key is same as source tweet id
+                conversation['structure'] = struct
+                branches = tree2branches(conversation['structure'])
+                conversation['branches'] = branches
+                train_dev_split[flag].append(conversation.copy())
+                allconv.append(conversation.copy())
+                print(foldr)
+    return train_dev_split
 #%%
 def load_dataset():
 

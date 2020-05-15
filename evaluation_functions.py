@@ -21,18 +21,18 @@ from copy import deepcopy
 def evaluation_function_stance_branchLSTM_RumEv(params):
     
     path = "preprocessing/saved_dataRumEval2019"
-    x_train = np.load(os.path.join(path, 'train/train_array.npy'))
-    y_train = np.load(os.path.join(path, 'train/fold_stance_labels.npy'))
+    x_train = np.load(os.path.join(path, 'train/train_array.npy'), allow_pickle=True)
+    y_train = np.load(os.path.join(path, 'train/fold_stance_labels.npy'), allow_pickle=True)
 
     print (x_train.shape)
 
 #    ids_train = np.load(os.path.join(path, 'train/tweet_ids.npy'))
-    x_dev = np.load(os.path.join(path, 'dev/train_array.npy'))
-    y_dev = np.load(os.path.join(path, 'dev/fold_stance_labels.npy'))
+    x_dev = np.load(os.path.join(path, 'dev/train_array.npy'), allow_pickle=True)
+    y_dev = np.load(os.path.join(path, 'dev/fold_stance_labels.npy'), allow_pickle=True)
 #    ids_dev = np.load(os.path.join(path, 'dev/tweet_ids.npy'))
-    x_test = np.load(os.path.join(path, 'test/train_array.npy'))
+    x_test = np.load(os.path.join(path, 'test/train_array.npy'), allow_pickle=True)
 #    y_test = np.load(os.path.join(path, 'test/fold_stance_labels.npy'))
-    ids_test = np.load(os.path.join(path, 'test/tweet_ids.npy'))
+    ids_test = np.load(os.path.join(path, 'test/tweet_ids.npy'), allow_pickle=True)
     # join dev and train
     x_dev = pad_sequences(x_dev, maxlen=len(x_train[0]), dtype='float32',
                           padding='post', truncating='post', value=0.)
@@ -91,12 +91,12 @@ def evaluation_function_stance_branchLSTM_RumEv(params):
 def evaluation_function_veracity_branchLSTM_RumEv(params):
 
     path = 'preprocessing/saved_dataRumEval2019'
-    x_train = np.load(os.path.join(path, 'train/train_array.npy'))
-    y_train = np.load(os.path.join(path, 'train/labels.npy'))
-    x_dev = np.load(os.path.join(path, 'dev/train_array.npy'))
-    y_dev = np.load(os.path.join(path, 'dev/labels.npy'))
-    x_test = np.load(os.path.join(path, 'test/train_array.npy'))
-    ids_test = np.load(os.path.join(path, 'test/ids.npy'))
+    x_train = np.load(os.path.join(path, 'train/train_array.npy'), allow_pickle=True)
+    y_train = np.load(os.path.join(path, 'train/labels.npy'), allow_pickle=True)
+    x_dev = np.load(os.path.join(path, 'dev/train_array.npy'), allow_pickle=True)
+    y_dev = np.load(os.path.join(path, 'dev/labels.npy'), allow_pickle=True)
+    x_test = np.load(os.path.join(path, 'test/train_array.npy'), allow_pickle=True)
+    ids_test = np.load(os.path.join(path, 'test/ids.npy'), allow_pickle=True)
     # join dev and train
     x_dev = pad_sequences(x_dev, maxlen=len(x_train[0]), dtype='float32',
                           padding='post', truncating='post', value=0.)

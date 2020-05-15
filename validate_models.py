@@ -4,15 +4,15 @@ This will load models and test them on the test set, it will print nice things.
 
 # -------------------------------------------------------------------------------------
 
-import pickle as pkl
-from keras.models import Sequential
-from keras.layers import Dense
 from keras.models import model_from_json
-from preprocessing.preprocessing_reddit import load_test_data_reddit
-from preprocessing.preprocessing_tweets import load_test_data_twitter
-
-import numpy
+from sklearn.metrics import f1_score, accuracy_score, mean_squared_error
+import numpy as np
 import os
+
+# -------------------------------------------------------------------------------------
+
+def prediction_to_label(pred):
+    return np.argmax(pred, axis=1)
 
 # -------------------------------------------------------------------------------------
 
@@ -34,13 +34,33 @@ veracity_model = model_from_json(loaded_veracity_model_json)
 veracity_model.load_weights("output/my_model_veracity_weights.h5")
 print("Loaded veracity model")
 
-data_reddit = load_test_data_reddit()
-data_tweets = load_test_data_twitter()
+path = 'preprocessing/saved_dataRumEval2019'
+x_train = np.load(os.path.join(path, 'train/train_array.npy'), allow_pickle=True)
+y_train = np.load(os.path.join(path, 'train/labels.npy'), allow_pickle=True)
+x_dev = np.load(os.path.join(path, 'dev/train_array.npy'), allow_pickle=True)
+y_dev = np.load(os.path.join(path, 'dev/labels.npy'), allow_pickle=True)
+x_test = np.load(os.path.join(path, 'test/train_array.npy'), allow_pickle=True)
+y_test = np.load(os.path.join(path, 'test/labels.npy'), allow_pickle=True)
+#ids_test = np.load(os.path.join(path, 'test/ids.npy'), allow_pickle=True)
 
 # evaluate loaded model on test data
-stance_model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy', 'RMSE', 'F1'])
-score = stance_model.evaluate(X, Y, verbose=0)
-print("%s: %.2f%%" % (stance_model.metrics_names[1], score[1]*100))
+stance_model.compile(loss='binary_crossentropy', optimizer='rmsprop',
+                     metrics=['accuracy'])
+
+train_preds = prediction_to_label(veracity_model.predict(x_train))
+dev_preds = prediction_to_label(veracity_model.predict(x_dev))
+test_preds = prediction_to_label(veracity_model.predict(x_test))
+
+for name, true, pred in zip(["Training set", "Dev set", "Test set"],
+                            [y_train, y_dev, y_test],
+                            [train_preds, dev_preds, test_preds]):
+    mse = mean_squared_error(true, pred, squared=False)
+    f1 = f1_score(true, pred, labels=[0, 1, 2], average="macro")
+    msg = "For " + name + ", f1 score is " + str(f1) + ". root mse is " + str(mse) + "."
+    print(msg)
+#score = stance_model.evaluate(x_test, y_test, verbose=0)
+#print("%s: %.2f%%" % (stance_model.metrics_names[1], score[1]*100))
+
 
 
 exit(0)

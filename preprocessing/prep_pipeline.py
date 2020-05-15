@@ -18,9 +18,11 @@ import help_prep_functions
 import numpy as np
 import os
 from keras.preprocessing.sequence import pad_sequences
+import json
 
 #%%
-
+with open("../data/test/final-eval-key.json", 'r') as f:
+    TEST_DATA_LABELS = json.load(f)
 
 def convert_label(label):
     if label == "true":
@@ -57,7 +59,7 @@ def prep_pipeline(dataset="RumEval2019", feature_set=["avgw2v"]):
     ###
 
     #%%
-    for fold in folds.keys():
+    for fold in list(reversed(list(folds.keys()))):
 
         print(fold)
         feature_fold = []
@@ -81,6 +83,9 @@ def prep_pipeline(dataset="RumEval2019", feature_set=["avgw2v"]):
             tweet_ids.extend(branches)
             feature_fold.extend(thread_features_array)
             for i in range(len(thread_features_array)):
+                if fold=="test":
+                    #if it's in the test set it wont have veracity, assign it.
+                    conversation['veracity'] = TEST_DATA_LABELS["subtaskbenglish"][conversation['id']]
                 labels.append(convert_label(conversation["veracity"]))
                 ids.append(conversation["id"])
 

@@ -120,6 +120,7 @@ lib64
 share/
 pyvenv.cfg
 *.zip
+.idea/
 
 # Project specific stuff
 data/*

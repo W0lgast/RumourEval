@@ -12,7 +12,13 @@ import os
 # -------------------------------------------------------------------------------------
 
 def prediction_to_label(pred):
-    return np.argmax(pred, axis=1)
+    if len(pred.shape) == 2:
+        return np.argmax(pred, axis=1)
+    if len(pred.shape) == 3:
+        return np.argmax(np.mean(pred, axis=1), axis=1)
+        #return np.argmax(np.mean(pred, axis=1), axis=1)
+    print("ERROR! ERROR!1!!!!")
+    exit(0)
 
 # -------------------------------------------------------------------------------------
 
@@ -43,10 +49,7 @@ x_test = np.load(os.path.join(path, 'test/train_array.npy'), allow_pickle=True)
 y_test = np.load(os.path.join(path, 'test/labels.npy'), allow_pickle=True)
 #ids_test = np.load(os.path.join(path, 'test/ids.npy'), allow_pickle=True)
 
-# evaluate loaded model on test data
-stance_model.compile(loss='binary_crossentropy', optimizer='rmsprop',
-                     metrics=['accuracy'])
-
+### TESTING STANCE MODEL (PART A)
 train_preds = prediction_to_label(veracity_model.predict(x_train))
 val_preds = prediction_to_label(veracity_model.predict(x_val))
 test_preds = prediction_to_label(veracity_model.predict(x_test))
@@ -58,10 +61,35 @@ for name, true, pred in zip(["Training set", "val set", "Test set"],
     f1 = f1_score(true, pred, labels=[0, 1, 2], average="macro")
     acc = accuracy_score(true, pred)
     print("#-----------------------------------------------------------------------------")
-    print("CALCULATING FOR " + name)
-    print("F1 score is " + str(f1))
-    print("RMSE is " + str(mse))
-    print("Accuracy is " + str(acc))
+    print("A - STANCE: CALCULATING FOR " + name)
+    print("A - STANCE: F1 score is " + str(f1) + " : EXPECTED BASELINE ON TEST: 0.4929")
+    print("A - STANCE: RMSE is " + str(mse))
+    print("A - STANCE: Accuracy is " + str(acc))
+
+print("#-----------------------------------------------------------------------------")
+print("#-----------------------------------------------------------------------------")
+
+### TESTING VERACITY MODEL (PART B)
+train_preds = prediction_to_label(stance_model.predict(x_train))
+val_preds = prediction_to_label(stance_model.predict(x_val))
+test_preds = prediction_to_label(stance_model.predict(x_test))
+
+for name, true, pred in zip(["Training set", "val set", "Test set"],
+                            [y_train, y_val, y_test],
+                            [train_preds, val_preds, test_preds]):
+    mse = mean_squared_error(true, pred, squared=False)
+    f1 = f1_score(true, pred, labels=[0, 1, 2, 3], average="macro")
+    acc = accuracy_score(true, pred)
+    print("#-----------------------------------------------------------------------------")
+    print("B - VERACITY: CALCULATING FOR " + name)
+    print("B - VERACITY: F1 score is " + str(f1) + " : EXPECTED BASELINE ON TEST: 0.3364")
+    print("B - VERACITY: RMSE is " + str(mse) + " : EXPECTED BASELINE ON TEST: 0.7806")
+    print("B - VERACITY: Accuracy is " + str(acc))
+
+
+#score = stance_model.evaluate(x_test, y_test, verbose=0)
+#print("%s: %.2f%%" % (stance_model.metrics_names[1], score[1]*100))
+
 #score = stance_model.evaluate(x_test, y_test, verbose=0)
 #print("%s: %.2f%%" % (stance_model.metrics_names[1], score[1]*100))
 

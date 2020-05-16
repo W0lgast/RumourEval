@@ -19,6 +19,8 @@ import numpy as np
 import os
 from keras.preprocessing.sequence import pad_sequences
 import json
+import pickle as pkl
+
 
 #%%
 with open("../data/test/final-eval-key.json", 'r') as f:
@@ -71,6 +73,14 @@ def prep_pipeline(dataset="RumEval2019", feature_set=["avgw2v"]):
 
             thread_feature_dict = extract_thread_features_incl_response(conversation)
 
+            if fold == "test":
+                # if it's in the test set it wont have veracity, assign it.
+                conversation['veracity'] = TEST_DATA_LABELS["subtaskbenglish"][conversation['id']]
+                conversation['source']['label'] = TEST_DATA_LABELS["subtaskaenglish"][conversation['id']]
+                for reply in conversation['replies']:
+                    reply['label'] = TEST_DATA_LABELS["subtaskaenglish"][reply['id_str']]
+
+
             (
                 thread_features_array,
                 thread_stance_labels,
@@ -83,9 +93,6 @@ def prep_pipeline(dataset="RumEval2019", feature_set=["avgw2v"]):
             tweet_ids.extend(branches)
             feature_fold.extend(thread_features_array)
             for i in range(len(thread_features_array)):
-                if fold=="test":
-                    #if it's in the test set it wont have veracity, assign it.
-                    conversation['veracity'] = TEST_DATA_LABELS["subtaskbenglish"][conversation['id']]
                 labels.append(convert_label(conversation["veracity"]))
                 ids.append(conversation["id"])
 

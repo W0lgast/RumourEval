@@ -241,24 +241,29 @@ with open("tempAnswers.json", "r") as f:
 shouldhaveA = len(list(TEST_DATA_LABELS["subtaskaenglish"].keys()))
 actuallyhaveA = len(list(predicted["subtaskaenglish"].keys()))
 Adiff = shouldhaveA - actuallyhaveA
-shouldhaveB = len(list(TEST_DATA_LABELS["subtaskaenglish"].keys()))
-actuallyhaveB = len(list(predicted["subtaskaenglish"].keys()))
+shouldhaveB = len(list(TEST_DATA_LABELS["subtaskbenglish"].keys()))
+actuallyhaveB = len(list(predicted["subtaskbenglish"].keys()))
 Bdiff = shouldhaveB - actuallyhaveB
+
+if "443938194715713536" not in predicted["subtaskaenglish"].keys():
+    print(f"\n443938194715713536 still missing from A")
 
 if Adiff != 0:
     if Adiff > 0:
         print(
-            f"You're missing {Adiff} ids in Task A (Stance)... write smarter printing to know which ones."
+            f"\nYou're missing {Adiff} ids in Task A (Stance)... write smarter printing to know which ones."
         )
     if Adiff < 0:
-        print(f"You have {Adiff} extra values in Task A (Stance)...")
+        print(f"\nYou have {Adiff} extra values in Task A (Stance)...")
 
 if Bdiff != 0:
     if Bdiff > 0:
         print(
-            f"You're missing {Adiff} ids in Task B (Veracity)... write smarter printing to know which ones."
+            f"\nYou're missing {Adiff} ids in Task B (Veracity)... write smarter printing to know which ones."
         )
     if Bdiff < 0:
-        print(f"You have {Adiff} extra values in Task B (Veracity)...")
+        print(f"\nYou have {Adiff} extra values in Task B (Veracity)...")
+
+print()
 
 exit(0)

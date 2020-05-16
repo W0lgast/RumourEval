@@ -7,8 +7,9 @@ import os
 import json
 from tree2branches import tree2branches
 import pickle as pkl
-HACK = pkl.load( open( "../hack.pkl", "rb" ) )
-HACK_TWEETS = pkl.load(open("../hack_tweets.pkl", "rb"))
+
+# HACK = pkl.load( open( "../hack.pkl", "rb" ) )
+# HACK_TWEETS = pkl.load(open("../hack_tweets.pkl", "rb"))
 #%%
 PATH_TO_TEST_TWITTER = "../data/test/twitter-en-test-data"
 

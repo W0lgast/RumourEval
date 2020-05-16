@@ -121,6 +121,7 @@ share/
 pyvenv.cfg
 *.zip
 .idea/
+etc/
 
 # Project specific stuff
 data/*

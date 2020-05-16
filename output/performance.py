@@ -8,6 +8,7 @@ import json
 from sklearn.metrics import (
     f1_score,
     accuracy_score,
+    mean_squared_error,
     confusion_matrix,
     precision_recall_fscore_support,
 )
@@ -62,8 +63,12 @@ for k in task_labels.keys():
     true.append(task_labels[k])
     pred.append(task_results[k])
 
+for i in [8, 33, 85, 133, 200]:
+    print(pred[i])
+
 print(task)
 print("Macro F score ", f1_score(true, pred, average="macro"))
+print("RMSE ", mean_squared_error(true, pred, squared=False))
 print("Accuracy ", accuracy_score(true, pred))
 print(
     "Confusion matrix \n",

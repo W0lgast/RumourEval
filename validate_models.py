@@ -44,11 +44,20 @@ print("Loaded veracity model")
 
 path = "preprocessing/saved_dataRumEval2019"
 x_train = np.load(os.path.join(path, "train/train_array.npy"), allow_pickle=True)
-y_train = np.load(os.path.join(path, "train/labels.npy"), allow_pickle=True)
+y_train_stance = np.load(
+    os.path.join(path, "train/fold_stance_labels.npy"), allow_pickle=True
+)
+y_train_veracity = np.load(os.path.join(path, "train/labels.npy"), allow_pickle=True)
 x_val = np.load(os.path.join(path, "dev/train_array.npy"), allow_pickle=True)
-y_val = np.load(os.path.join(path, "dev/labels.npy"), allow_pickle=True)
+y_val_stance = np.load(
+    os.path.join(path, "dev/fold_stance_labels.npy"), allow_pickle=True
+)
+y_val_veracity = np.load(os.path.join(path, "dev/labels.npy"), allow_pickle=True)
 x_test = np.load(os.path.join(path, "test/train_array.npy"), allow_pickle=True)
-y_test = np.load(os.path.join(path, "test/labels.npy"), allow_pickle=True)
+y_test_stance = np.load(
+    os.path.join(path, "test/fold_stance_labels.npy"), allow_pickle=True
+)
+y_test_veracity = np.load(os.path.join(path, "test/labels.npy"), allow_pickle=True)
 # ids_test = np.load(os.path.join(path, 'test/ids.npy'), allow_pickle=True)
 
 ### TESTING STANCE MODEL (PART A)
@@ -58,18 +67,21 @@ test_preds = prediction_to_label(veracity_model.predict(x_test))
 
 for name, true, pred in zip(
     ["Training set", "val set", "Test set"],
-    [y_train, y_val, y_test],
+    [y_train_stance, y_val_stance, y_test_stance],
     [train_preds, val_preds, test_preds],
 ):
+    # if name == "Test set":
+    #     for i in [8, 33, 85, 133, 200]:
+    #         print(pred[i])
     mse = mean_squared_error(true, pred, squared=False)
-    f1 = f1_score(true, pred, labels=[0, 1, 2, 3], average="macro")
+    f1 = f1_score(true, pred, labels=np.unique(pred), average="macro")
     acc = accuracy_score(true, pred)
     print(
         "#-----------------------------------------------------------------------------"
     )
     print("A - STANCE: CALCULATING FOR " + name)
     print("A - STANCE: F1 score is " + str(f1) + " : EXPECTED BASELINE ON TEST: 0.4929")
-    print("A - STANCE: RMSE is " + str(mse))
+    # print("A - STANCE: RMSE is " + str(mse))
     print("A - STANCE: Accuracy is " + str(acc))
 
 print("#-----------------------------------------------------------------------------")
@@ -82,11 +94,15 @@ test_preds = prediction_to_label(stance_model.predict(x_test))
 
 for name, true, pred in zip(
     ["Training set", "val set", "Test set"],
-    [y_train, y_val, y_test],
+    [y_train_veracity, y_val_veracity, y_test_veracity],
     [train_preds, val_preds, test_preds],
 ):
+
+    # if name == "Test set":
+    #     for i in [8, 33, 85, 133, 200]:
+    #         print(pred[i])
     mse = mean_squared_error(true, pred, squared=False)
-    f1 = f1_score(true, pred, labels=[0, 1, 2], average="macro")
+    f1 = f1_score(true, pred, labels=np.unique(pred), average="macro")
     acc = accuracy_score(true, pred)
     print(
         "#-----------------------------------------------------------------------------"

@@ -19,6 +19,21 @@ import pickle as pkl
 import json
 
 # -------------------------------------------------------------------------------------
+def baseline_printout(f1_pred=None, f1_base=None, mse_pred=None, mse_base=None):
+
+    if f1_pred != None:
+        if f1_pred >= f1_base:
+            return "✔️"
+        else:
+            return "❌"
+
+    elif mse_pred != None:
+        if mse_base >= mse_pred:
+            return "✔️"
+        else:
+            return "❌"
+
+
 def labell2strA(label):
 
     if label == 0:
@@ -184,7 +199,10 @@ for name, ids, json_file, true, pred in zip(
     )
     print(f"A - STANCE: CALCULATING FOR {name.upper()}")
     if name == "Test set":
-        print(f"A - STANCE: F1 score is {f1}: EXPECTED BASELINE ON TEST: 0.4929")
+        f1base = 0.4929
+        print(
+            f"A - STANCE: F1 score is {f1}: EXPECTED BASELINE ON TEST: 0.4929 {baseline_printout(f1_pred=f1, f1_base=f1base)}"
+        )
     else:
         print(f"A - STANCE: F1 score is {f1}")
     # print("A - STANCE: RMSE is " + str(mse))
@@ -217,8 +235,14 @@ for name, true, pred in zip(
     )
     print(f"B - VERACITY: CALCULATING FOR {name.upper()}")
     if name == "Test set":
-        print(f"B - VERACITY: F1 score is {f1}: EXPECTED BASELINE ON TEST: 0.3364")
-        print(f"B - VERACITY: RMSE score is {mse}: EXPECTED BASELINE ON TEST: 0.7806")
+        f1base = 0.3364
+        msebase = 0.7806
+        print(
+            f"B - VERACITY: F1 score is {f1}: EXPECTED BASELINE ON TEST: 0.3364 {baseline_printout(f1_pred=f1, f1_base=f1base)}"
+        )
+        print(
+            f"B - VERACITY: RMSE score is {mse}: EXPECTED BASELINE ON TEST: 0.7806 {baseline_printout(mse_pred=mse, mse_base=msebase)}"
+        )
     else:
         print(f"B - VERACITY: F1 score is {f1}")
         print(f"B - VERACITY: RMSE score is {mse}")

@@ -19,6 +19,64 @@ import pickle as pkl
 import json
 
 # -------------------------------------------------------------------------------------
+def labell2strA(label):
+
+    if label == 0:
+        return "support"
+    elif label == 1:
+        return "comment"
+    elif label == 2:
+        return "deny"
+    elif label == 3:
+        return "query"
+    else:
+        print(label)
+
+
+def labell2strB(label):
+
+    if label == 0:
+        return "true"
+    elif label == 1:
+        return "false"
+    elif label == 2:
+        return "unverified"
+    else:
+        print(label)
+
+
+def convertsave_competitionformat(
+    idsA, predictionsA, idsB, predictionsB, confidenceB, temp_save=False
+):
+
+    subtaskaenglish = {}
+    subtaskbenglish = {}
+
+    for i, id in enumerate(idsA):
+        # print(id[-1])
+        subtaskaenglish[id[-1]] = labell2strA(predictionsA[i])
+
+    for i, id in enumerate(idsB):
+        subtaskbenglish[id] = [labell2strB(predictionsB[i]), 0]
+
+    answer = {}
+    answer["subtaskaenglish"] = subtaskaenglish
+    answer["subtaskbenglish"] = subtaskbenglish
+
+    answer["subtaskadanish"] = {}
+    answer["subtaskbdanish"] = {}
+
+    answer["subtaskarussian"] = {}
+    answer["subtaskbrussian"] = {}
+
+    if temp_save:
+        with open("tempAnswers.json", "w") as f:
+            json.dump(answer, f)
+    else:
+        with open("output/answer.json", "w") as f:
+            json.dump(answer, f)
+
+    return answer
 
 
 def prediction_to_label(pred):
@@ -92,18 +150,21 @@ train_preds = stance_model.predict_classes(x_train)
 val_preds = stance_model.predict_classes(x_val)
 test_preds = stance_model.predict_classes(x_test)
 
-for name, ids, json, true, pred in zip(
+for name, ids, json_file, true, pred in zip(
     ["Training set", "val set", "Test set"],
     [twt_ids_train, twt_ids_dev, twt_ids_test],
     [TRAIN_DATA_LABELS, VAL_DATA_LABELS, TEST_DATA_LABELS],
     [y_train_stance, y_val_stance, y_test_stance],
     [train_preds, val_preds, test_preds],
 ):
-    trees, tree_pred, tree_label = branch2treelabelsStance(ids, true, pred, json)
+    trees, tree_pred, tree_label = branch2treelabelsStance(ids, true, pred, json_file)
 
     mse = mean_squared_error(tree_label, tree_pred, squared=False)
 
     f1 = f1_score(tree_label, tree_pred, labels=np.unique(pred), average="macro")
+
+    if name == "Test set":
+        predictionsA = tree_pred
 
     # m = MultiLabelBinarizer().fit(true)
     #
@@ -121,13 +182,17 @@ for name, ids, json, true, pred in zip(
     print(
         "#-----------------------------------------------------------------------------"
     )
-    print("A - STANCE: CALCULATING FOR " + name)
-    print("A - STANCE: F1 score is " + str(f1) + " : EXPECTED BASELINE ON TEST: 0.4929")
+    print(f"A - STANCE: CALCULATING FOR {name.upper()}")
+    if name == "Test set":
+        print(f"A - STANCE: F1 score is {f1}: EXPECTED BASELINE ON TEST: 0.4929")
+    else:
+        print(f"A - STANCE: F1 score is {f1}")
     # print("A - STANCE: RMSE is " + str(mse))
     # print("A - STANCE: Accuracy is " + str(acc))
 
-print("#-----------------------------------------------------------------------------")
-print("#-----------------------------------------------------------------------------")
+print(
+    "#-----------------------------------------------------------------------------\n"
+)
 
 ### TESTING VERACITY MODEL (PART B)
 
@@ -144,15 +209,20 @@ for name, true, pred in zip(
     mse = mean_squared_error(true, pred, squared=False)
     f1 = f1_score(true, pred, labels=np.unique(pred), average="macro")
     acc = accuracy_score(true, pred)
+
+    if name == "Test set":
+        predictionsB = pred
     print(
         "#-----------------------------------------------------------------------------"
     )
-    print("B - VERACITY: CALCULATING FOR " + name)
-    print(
-        "B - VERACITY: F1 score is " + str(f1) + " : EXPECTED BASELINE ON TEST: 0.3364"
-    )
-    print("B - VERACITY: RMSE is " + str(mse) + " : EXPECTED BASELINE ON TEST: 0.7806")
-    print("B - VERACITY: Accuracy is " + str(acc))
+    print(f"B - VERACITY: CALCULATING FOR {name.upper()}")
+    if name == "Test set":
+        print(f"B - VERACITY: F1 score is {f1}: EXPECTED BASELINE ON TEST: 0.3364")
+        print(f"B - VERACITY: RMSE score is {mse}: EXPECTED BASELINE ON TEST: 0.7806")
+    else:
+        print(f"B - VERACITY: F1 score is {f1}")
+        print(f"B - VERACITY: RMSE score is {mse}")
+    # print("B - VERACITY: Accuracy is " + str(acc))
 
 
 # score = stance_model.evaluate(x_test, y_test, verbose=0)
@@ -160,6 +230,35 @@ for name, true, pred in zip(
 
 # score = stance_model.evaluate(x_test, y_test, verbose=0)
 # print("%s: %.2f%%" % (stance_model.metrics_names[1], score[1]*100))
+confidenceB = []
+answer = convertsave_competitionformat(
+    twt_ids_test, predictionsA, ids_test, predictionsB, confidenceB, temp_save=True
+)
 
+with open("tempAnswers.json", "r") as f:
+    predicted = json.load(f)
+
+shouldhaveA = len(list(TEST_DATA_LABELS["subtaskaenglish"].keys()))
+actuallyhaveA = len(list(predicted["subtaskaenglish"].keys()))
+Adiff = shouldhaveA - actuallyhaveA
+shouldhaveB = len(list(TEST_DATA_LABELS["subtaskaenglish"].keys()))
+actuallyhaveB = len(list(predicted["subtaskaenglish"].keys()))
+Bdiff = shouldhaveB - actuallyhaveB
+
+if Adiff != 0:
+    if Adiff > 0:
+        print(
+            f"You're missing {Adiff} ids in Task A (Stance)... write smarter printing to know which ones."
+        )
+    if Adiff < 0:
+        print(f"You have {Adiff} extra values in Task A (Stance)...")
+
+if Bdiff != 0:
+    if Bdiff > 0:
+        print(
+            f"You're missing {Adiff} ids in Task B (Veracity)... write smarter printing to know which ones."
+        )
+    if Bdiff < 0:
+        print(f"You have {Adiff} extra values in Task B (Veracity)...")
 
 exit(0)

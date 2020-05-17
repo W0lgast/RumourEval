@@ -8,17 +8,20 @@ from sklearn.tree import DecisionTreeClassifier
 import numpy as np
 from sklearn.neural_network import MLPClassifier
 from sklearn.naive_bayes import MultinomialNB
-
+from sklearn.svm import LinearSVC, SVC
 
 # -------------------------------------------------------------------------------------
 
 class TaskBEnsemble(object):
-    def __init__(self):
+    def __init__(self, random_state=364):
         self._models = [
             MultinomialNB(),
-            DecisionTreeClassifier(),
+            DecisionTreeClassifier(random_state=random_state),
+            SVC(kernel="sigmoid", random_state=random_state),
+            LinearSVC(random_state=random_state),
             MLPClassifier(hidden_layer_sizes=tuple([100] * 20), max_iter=1000, early_stopping=True,
-                          random_state=364, tol=0.0001, activation="relu", n_iter_no_change=100)
+                          tol=0.0001, activation="relu", n_iter_no_change=100,
+                          random_state=random_state)
         ]
 
     def fit(self, X, Y):

@@ -145,7 +145,8 @@ for i in range(len(BOW_features_dev)):
 test_BOW_sents, test_all_extra_feats, Y_test, ids_test = get_features(
     all_data, whichset="testing"
 )
-Y_test = [y[0] for y in Y_test]
+if not isinstance(Y_test[0], str):
+    Y_test = [y[0] for y in Y_test]
 test_cv_fit = cv.transform(test_BOW_sents)
 test_BOW_features = test_cv_fit.toarray()
 
@@ -162,7 +163,7 @@ if not opts.sklearn:
     # BASELINE
     #clf = LinearSVC(random_state=364)
 
-    clf = SVC(kernel="sigmoid", random_state=364)
+    #clf = SVC(kernel="sigmoid", random_state=364)
 
     #kernel = 1.0 * RBF(1.0)
     #clf = GaussianProcessClassifier(kernel=kernel, random_state=364).fit(X, Y)
@@ -175,7 +176,7 @@ if not opts.sklearn:
     #clf = DecisionTreeClassifier()
     #clf = MultinomialNB()
 
-    #clf = TaskBEnsemble()
+    clf = TaskBEnsemble(random_state=364)
 
     clf.fit(X, Y)
 

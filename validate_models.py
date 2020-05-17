@@ -23,12 +23,11 @@ def genXY(pred_dict, label_dict, task="A"):
 
     X = []
     Y = []
-    if task == "A":
-        for label in label_dict["subtaskaenglish"].keys():
+    for label in label_dict.keys():
+        if task == "A":
             X.append(convertTaskAtoNumber(pred_dict[label]))
             Y.append(convertTaskAtoNumber(label_dict[label]))
-    else:
-        for label in label_dict["subtaskbenglish"].keys():
+        else:
             X.append(pred_dict[label])
             Y.append(convertTaskBtoNumber(label_dict[label]))
 
@@ -116,7 +115,7 @@ def convertsave_competitionformat(
 
     for i, id in enumerate(idsB.keys()):
         # TODO:: replace the 0 with actual confidence
-        subtaskbenglish[id] = [labell2strB(predictionsB[i]), 0]
+        subtaskbenglish[id] = [labell2strB(predictionsB[i]), confidenceB[i]]
 
     answer = {}
     answer["subtaskaenglish"] = subtaskaenglish
@@ -211,6 +210,7 @@ test_preds = stance_model.predict_classes(x_test)
 
 predictionsA = []
 predictionsB = []
+confidenceB = []
 
 for name, ids, json_file, true, pred in zip(
     ["Training set", "val set", "Test set"],
@@ -266,14 +266,22 @@ for name, ids, json_file, true, pred in zip(
 
     trees, tree_pred = branch2treelabelsVeracity(ids, pred)
 
-    X, Y = genXY(tree_pred, json_file, task="B")
+    X, Y = genXY(tree_pred, json_file["subtaskbenglish"], task="B")
 
-    mse = mean_squared_error(Y, X[:][0], squared=False)
-    f1 = f1_score(true, pred, labels=np.unique(pred), average="macro")
-    acc = accuracy_score(true, pred)
+    X_array = np.array(X)
+    Y_array = np.array(Y)
+    Y_array = Y_array.reshape((Y_array.shape[0], 1))
+    Y_array = np.concatenate((Y_array, np.ones(Y_array.shape)), 1)
+
+    mse = mean_squared_error(Y_array[:, 0], X_array[:, 0], squared=False)
+    f1 = f1_score(
+        Y_array[:, 0], X_array[:, 0], labels=np.unique(X_array[:, 0]), average="macro"
+    )
+    acc = accuracy_score(Y_array[:, 0], X_array[:, 0])
 
     if name == "Test set":
-        predictionsB = pred
+        predictionsB = X_array[:, 0]
+        confidenceB = X_array[:, 1]
     print(
         "#-----------------------------------------------------------------------------"
     )
@@ -298,7 +306,7 @@ for name, ids, json_file, true, pred in zip(
 
 # score = stance_model.evaluate(x_test, y_test, verbose=0)
 # print("%s: %.2f%%" % (stance_model.metrics_names[1], score[1]*100))
-confidenceB = []
+
 answer = convertsave_competitionformat(
     TEST_DATA_LABELS["subtaskaenglish"],
     predictionsA,

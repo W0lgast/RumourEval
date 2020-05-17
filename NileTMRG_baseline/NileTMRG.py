@@ -30,6 +30,7 @@ from ultraEnsemble import TaskBEnsemble
 from sklearn.gaussian_process.kernels import RBF
 from sklearn.gaussian_process import GaussianProcessClassifier
 
+
 def convertTaskBtoNumber(label):
     if label == "true":
         return 0
@@ -37,6 +38,7 @@ def convertTaskBtoNumber(label):
         return 1
     elif label == "unverified":
         return 2
+
 
 ####
 # Display progress logs on stdout
@@ -161,24 +163,25 @@ for i in range(len(test_BOW_features)):
 ##############################   MODELS GO HERE   ##############################
 if not opts.sklearn:
     # BASELINE
-    #clf = LinearSVC(random_state=364)
+    # clf = LinearSVC(random_state=364)
 
-    #clf = SVC(kernel="sigmoid", random_state=364)
+    # clf = SVC(kernel="sigmoid", random_state=364)
 
-    #kernel = 1.0 * RBF(1.0)
-    #clf = GaussianProcessClassifier(kernel=kernel, random_state=364).fit(X, Y)
+    # kernel = 1.0 * RBF(1.0)
+    # clf = GaussianProcessClassifier(kernel=kernel, random_state=364).fit(X, Y)
 
-    #clf = SGDClassifier(alpha=0.0001, max_iter=50, penalty="elasticnet")
+    # clf = SGDClassifier(alpha=0.0001, max_iter=50, penalty="elasticnet")
 
-    #clf = MLPClassifier(hidden_layer_sizes=tuple([100]*20), max_iter=1000, early_stopping=True,
+    # clf = MLPClassifier(hidden_layer_sizes=tuple([100]*20), max_iter=1000, early_stopping=True,
     #                    random_state=364, tol=0.0001, activation="relu", n_iter_no_change=100)
 
-    #clf = DecisionTreeClassifier()
-    #clf = MultinomialNB()
+    # clf = DecisionTreeClassifier()
+    # clf = MultinomialNB()
 
     clf = TaskBEnsemble(random_state=364)
 
     clf.fit(X, Y)
+    clf.fit_ensemble(X, Y)
 
 # Only used if running sklearn
 def benchmark(clf):
@@ -223,8 +226,8 @@ if not opts.sklearn:
     print("Train Macro F:")
     print(metrics.f1_score(Y, Y_pred, average="macro"))
 
-    #print("Train RMSE:")
-    #print(metrics.mean_squared_error([convertTaskBtoNumber(y) for y in Y],
+    # print("Train RMSE:")
+    # print(metrics.mean_squared_error([convertTaskBtoNumber(y) for y in Y],
     #                                 [convertTaskBtoNumber(y) for y in Y_pred], squared=False))
 
     Y_dev_pred = clf.predict(X_dev)
@@ -236,8 +239,8 @@ if not opts.sklearn:
     print("Validation Macro F:")
     print(metrics.f1_score(Y_dev, Y_dev_pred, average="macro"))
 
-    #print("Validation RMSE:")
-    #print(metrics.mean_squared_error([convertTaskBtoNumber(y) for y in Y_dev],
+    # print("Validation RMSE:")
+    # print(metrics.mean_squared_error([convertTaskBtoNumber(y) for y in Y_dev],
     #                                 [convertTaskBtoNumber(y) for y in Y_dev_pred], squared=False))
 
     Y_pred = clf.predict(X_test)
@@ -247,13 +250,13 @@ if not opts.sklearn:
     print(metrics.accuracy_score(Y_test, Y_pred))
 
     print("Testing Macro F:")
-    print(metrics.f1_score(Y_test, Y_pred, average='macro'))
+    print(metrics.f1_score(Y_test, Y_pred, average="macro"))
 
-    #print("Testing RMSE:")
-    #print(metrics.mean_squared_error([convertTaskBtoNumber(y) for y in Y_test],
+    # print("Testing RMSE:")
+    # print(metrics.mean_squared_error([convertTaskBtoNumber(y) for y in Y_test],
     #                                 [convertTaskBtoNumber(y) for y in Y_pred], squared=False))
 
-    #print(confusion_matrix(Y_test, Y_pred))
+    # print(confusion_matrix(Y_test, Y_pred))
 
 ##
 

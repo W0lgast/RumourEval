@@ -1,0 +1,23 @@
+MultinomialNB(alpha=1.0, class_prior=None, fit_prior=True) best params: {'alpha': 1.0, 'fit_prior': True}
+DecisionTreeClassifier(ccp_alpha=0.0, class_weight=None, criterion='gini',
+                       max_depth=None, max_features=None, max_leaf_nodes=None,
+                       min_impurity_decrease=0.0, min_impurity_split=None,
+                       min_samples_leaf=1, min_samples_split=2,
+                       min_weight_fraction_leaf=0.0, presort='deprecated',
+                       random_state=364, splitter='best') best params: {'criterion': 'gini'}
+SVC(C=1.0, break_ties=False, cache_size=200, class_weight=None, coef0=0.0,
+    decision_function_shape='ovr', degree=3, gamma='scale', kernel='sigmoid',
+    max_iter=-1, probability=True, random_state=364, shrinking=True, tol=0.001,
+    verbose=False) best params: {'C': 1, 'degree': 2, 'gamma': 'scale', 'kernel': 'poly', 'probability': True}
+CalibratedClassifierCV(base_estimator=LinearSVC(C=1.0, class_weight=None,
+                                                dual=True, fit_intercept=True,
+                                                intercept_scaling=1,
+                                                loss='squared_hinge',
+                                                max_iter=1000,
+                                                multi_class='ovr', penalty='l2',
+                                                random_state=364, tol=0.0001,
+                                                verbose=0),
+                       cv=None, method='isotonic') best params: {'base_estimator': LinearSVC(C=1.0, class_weight=None, dual=True, fit_intercept=True,
+          intercept_scaling=1, loss='squared_hinge', max_iter=1000,
+          multi_class='ovr', penalty='l2', random_state=364, tol=0.0001,
+          verbose=0), 'method': 'isotonic'}

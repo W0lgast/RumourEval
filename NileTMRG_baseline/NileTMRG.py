@@ -16,10 +16,27 @@ from sklearn.linear_model import (
 )
 from sklearn.naive_bayes import BernoulliNB, ComplementNB, MultinomialNB
 from sklearn.neighbors import KNeighborsClassifier, NearestCentroid
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.pipeline import Pipeline
-from sklearn.svm import LinearSVC
+from sklearn.svm import LinearSVC, SVC
 from sklearn.utils.extmath import density
 from preprocess import *
+import numpy as np
+from sklearn.neural_network import MLPClassifier
+from sklearn.naive_bayes import MultinomialNB
+from ultraEnsemble import TaskBEnsemble
+
+
+from sklearn.gaussian_process.kernels import RBF
+from sklearn.gaussian_process import GaussianProcessClassifier
+
+def convertTaskBtoNumber(label):
+    if label == "true":
+        return 0
+    elif label == "false":
+        return 1
+    elif label == "unverified":
+        return 2
 
 ####
 # Display progress logs on stdout
@@ -125,32 +142,40 @@ for i in range(len(BOW_features_dev)):
 
 
 ### TEST ###
-# test_BOW_sents, test_all_extra_feats, Y_test, ids_test = get_features(
-#     all_data, whichset="testing"
-# )
-#
-# test_cv_fit = cv.transform(test_BOW_sents)
-# test_BOW_features = test_cv_fit.toarray()
-#
-# # Append features
-# X_test = []
-# for i in range(len(test_BOW_features)):
-#     line = list(test_BOW_features[i]) + test_all_extra_feats[i]
-#     X_test.append(line)
-#
-# # X_test = scl.transform(X_test)
+test_BOW_sents, test_all_extra_feats, Y_test, ids_test = get_features(
+    all_data, whichset="testing"
+)
+Y_test = [y[0] for y in Y_test]
+test_cv_fit = cv.transform(test_BOW_sents)
+test_BOW_features = test_cv_fit.toarray()
+
+# Append features
+X_test = []
+for i in range(len(test_BOW_features)):
+    line = list(test_BOW_features[i]) + test_all_extra_feats[i]
+    X_test.append(line)
+
+# X_test = scl.transform(X_test)
 
 ##############################   MODELS GO HERE   ##############################
 if not opts.sklearn:
     # BASELINE
-    clf = LinearSVC(random_state=364)
+    #clf = LinearSVC(random_state=364)
 
-    # clf = SVC(kernel="sigmoid", random_state=364)
+    clf = SVC(kernel="sigmoid", random_state=364)
 
-    # kernel = 1.0 * RBF(1.0)
-    # clf = GaussianProcessClassifier(kernel=kernel, random_state=364).fit(X, Y)
+    #kernel = 1.0 * RBF(1.0)
+    #clf = GaussianProcessClassifier(kernel=kernel, random_state=364).fit(X, Y)
 
-    # clf = SGDClassifier(alpha=0.0001, max_iter=50, penalty="elasticnet")
+    #clf = SGDClassifier(alpha=0.0001, max_iter=50, penalty="elasticnet")
+
+    #clf = MLPClassifier(hidden_layer_sizes=tuple([100]*20), max_iter=1000, early_stopping=True,
+    #                    random_state=364, tol=0.0001, activation="relu", n_iter_no_change=100)
+
+    #clf = DecisionTreeClassifier()
+    #clf = MultinomialNB()
+
+    #clf = TaskBEnsemble()
 
     clf.fit(X, Y)
 
@@ -197,25 +222,37 @@ if not opts.sklearn:
     print("Train Macro F:")
     print(metrics.f1_score(Y, Y_pred, average="macro"))
 
+    #print("Train RMSE:")
+    #print(metrics.mean_squared_error([convertTaskBtoNumber(y) for y in Y],
+    #                                 [convertTaskBtoNumber(y) for y in Y_pred], squared=False))
+
     Y_dev_pred = clf.predict(X_dev)
 
     # get scores
-    print("dev Accuracy:")
+    print("Validation Accuracy:")
     print(metrics.accuracy_score(Y_dev, Y_dev_pred))
 
-    print("dev Macro F:")
+    print("Validation Macro F:")
     print(metrics.f1_score(Y_dev, Y_dev_pred, average="macro"))
 
-    # Y_pred = clf.predict(X_test)
+    #print("Validation RMSE:")
+    #print(metrics.mean_squared_error([convertTaskBtoNumber(y) for y in Y_dev],
+    #                                 [convertTaskBtoNumber(y) for y in Y_dev_pred], squared=False))
+
+    Y_pred = clf.predict(X_test)
 
     # get scores
-    # print "Accuracy:"
-    # print metrics.accuracy_score(Y_test, Y_pred)
-    #
-    # print "Macro F:"
-    # print metrics.f1_score(Y_test, Y_pred, average='macro')
-    #
-    # print confusion_matrix(Y_test, Y_pred)
+    print("Testing Accuracy:")
+    print(metrics.accuracy_score(Y_test, Y_pred))
+
+    print("Testing Macro F:")
+    print(metrics.f1_score(Y_test, Y_pred, average='macro'))
+
+    #print("Testing RMSE:")
+    #print(metrics.mean_squared_error([convertTaskBtoNumber(y) for y in Y_test],
+    #                                 [convertTaskBtoNumber(y) for y in Y_pred], squared=False))
+
+    #print(confusion_matrix(Y_test, Y_pred))
 
 ##
 

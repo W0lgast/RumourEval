@@ -101,7 +101,8 @@ def get_features(all_data, whichset="training"):
         if whichset == "testing":
 
             submission_file = (
-                "stance_answer_test.json"  # insert your own predictions here
+                #"../data/test/final-eval-key.json" # these are the true answers
+                "../tempAnswers.json"
             )
             submission_full = json.load(open(submission_file, "r"))
             submission = submission_full["subtaskaenglish"]
@@ -120,6 +121,9 @@ def get_features(all_data, whichset="training"):
                     d = d + 1
                 elif submission[repl["id_str"]] == "query":
                     q = q + 1
+
+            #kmf: addition here, might be an error
+            conversation['veracity'] = submission_full["subtaskbenglish"][conversation['id']]
 
         elif whichset == "development":
 
@@ -149,6 +153,8 @@ def get_features(all_data, whichset="training"):
         stance_labels = tweet_label_dict["train"]
 
         stance_labels.update(tweet_label_dict["dev"])
+
+        stance_labels.update(tweet_label_dict["test"])
 
         if stance_labels[tw["id_str"]] == "support":
             s = s + 1

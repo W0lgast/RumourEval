@@ -23,11 +23,17 @@ def load_true_labels():
     with open(path_train, "r") as f:
         train_key = json.load(f)
 
+    path_train = "../data/test/final-eval-key.json"
+    with open(path_train, "r") as f:
+        test_key = json.load(f)
+
     tweet_label_dict["dev"] = dev_key["subtaskaenglish"]
     tweet_label_dict["train"] = train_key["subtaskaenglish"]
+    tweet_label_dict["test"] = test_key["subtaskaenglish"]
 
     veracity_label_dict["dev"] = dev_key["subtaskbenglish"]
     veracity_label_dict["train"] = train_key["subtaskbenglish"]
+    veracity_label_dict["test"] = test_key["subtaskbenglish"]
 
     return tweet_label_dict, veracity_label_dict
 

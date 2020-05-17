@@ -64,6 +64,13 @@ def convertsave_competitionformat(
     idsA, predictionsA, idsB, predictionsB, confidenceB, temp_save=False
 ):
 
+    # TODO:: idsA needs to be turned into 1827
+    print("\nOn output:")
+    print(f"idsA has {len(idsA)} elements")
+    print(f"predictionsA has {len(predictionsA)} elements")
+    print(f"idsB has {len(idsB)} elements")
+    print(f"predictionsB has {len(predictionsB)} elements")
+
     subtaskaenglish = {}
     subtaskbenglish = {}
 
@@ -72,6 +79,7 @@ def convertsave_competitionformat(
         subtaskaenglish[id[-1]] = labell2strA(predictionsA[i])
 
     for i, id in enumerate(idsB):
+        # TODO:: replace the 0 with actual confidence
         subtaskbenglish[id] = [labell2strB(predictionsB[i]), 0]
 
     answer = {}
@@ -165,6 +173,9 @@ train_preds = stance_model.predict_classes(x_train)
 val_preds = stance_model.predict_classes(x_val)
 test_preds = stance_model.predict_classes(x_test)
 
+predictionsA = []
+predictionsB = []
+
 for name, ids, json_file, true, pred in zip(
     ["Training set", "val set", "Test set"],
     [twt_ids_train, twt_ids_dev, twt_ids_test],
@@ -176,7 +187,7 @@ for name, ids, json_file, true, pred in zip(
 
     mse = mean_squared_error(tree_label, tree_pred, squared=False)
 
-    f1 = f1_score(tree_label, tree_pred, labels=np.unique(pred), average="macro")
+    f1 = f1_score(tree_label, tree_pred, labels=np.unique(tree_pred), average="macro")
 
     if name == "Test set":
         predictionsA = tree_pred
@@ -269,11 +280,14 @@ shouldhaveB = len(list(TEST_DATA_LABELS["subtaskbenglish"].keys()))
 actuallyhaveB = len(list(predicted["subtaskbenglish"].keys()))
 Bdiff = shouldhaveB - actuallyhaveB
 
-if "443938194715713536" not in predicted["subtaskaenglish"].keys():
-    print(f"\n443938194715713536 still missing from A")
-
 if Adiff != 0:
+
+    diff = set(list(TEST_DATA_LABELS["subtaskaenglish"].keys())).difference(
+        set(list(predicted["subtaskaenglish"].keys()))
+    )
+
     if Adiff > 0:
+        print(f"\n{list(diff)[0]} still missing from A")
         print(
             f"\nYou're missing {Adiff} ids in Task A (Stance)... write smarter printing to know which ones."
         )

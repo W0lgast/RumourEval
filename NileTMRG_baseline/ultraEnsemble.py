@@ -17,8 +17,16 @@ from sklearn.linear_model import (
 )
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import VotingClassifier
+from nltk.classify.scikitlearn import SklearnClassifier
+from sklearn.calibration import CalibratedClassifierCV
 
 # -------------------------------------------------------------------------------------
+
+# class kippsSVC(LinearSVC):
+#     def __init__(self, random_state=364):
+#         super(self, LinearSVC).__init__(random_state=random_state)
+#
+#     def prefict_proba(self):
 
 
 class TaskBEnsemble(object):
@@ -27,7 +35,12 @@ class TaskBEnsemble(object):
             MultinomialNB(),
             DecisionTreeClassifier(random_state=random_state),
             SVC(kernel="sigmoid", random_state=random_state, probability=True),
-            # LinearSVC(random_state=random_state),
+            #LinearSVC(random_state=random_state),
+            CalibratedClassifierCV(
+                base_estimator=LinearSVC(random_state=random_state),
+                method='isotonic', cv=None  # your CV instance
+            ),
+            #SklearnClassifier(SVC(kernel='linear', probability=True, random_state=random_state)),
             MLPClassifier(
                 hidden_layer_sizes=tuple([100] * 20),
                 max_iter=1000,

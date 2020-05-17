@@ -9,9 +9,7 @@ from sklearn.metrics import (
     f1_score,
     accuracy_score,
     mean_squared_error,
-    precision_recall_fscore_support,
 )
-from sklearn.preprocessing import MultiLabelBinarizer
 from branch2treelabels import branch2treelabelsStance
 import numpy as np
 import os
@@ -19,6 +17,31 @@ import pickle as pkl
 import json
 
 # -------------------------------------------------------------------------------------
+
+
+def genXY(pred_dict, label_dict):
+
+    X = []
+    Y = []
+    for label in label_dict.keys():
+
+        X.append(convertTaskAtoNumber(pred_dict[label]))
+        Y.append(convertTaskAtoNumber(label_dict[label]))
+
+    return X, Y
+
+
+def convertTaskAtoNumber(label):
+    if label == "support":
+        return 0
+    elif label == "comment":
+        return 1
+    elif label == "deny":
+        return 2
+    elif label == "query":
+        return 3
+
+
 def baseline_printout(f1_pred=None, f1_base=None, mse_pred=None, mse_base=None):
 
     if f1_pred != None:
@@ -74,11 +97,10 @@ def convertsave_competitionformat(
     subtaskaenglish = {}
     subtaskbenglish = {}
 
-    for i, id in enumerate(idsA):
-        # print(id[-1])
-        subtaskaenglish[id[-1]] = labell2strA(predictionsA[i])
+    for i, id in enumerate(idsA.keys()):
+        subtaskaenglish[id] = labell2strA(predictionsA[i])
 
-    for i, id in enumerate(idsB):
+    for i, id in enumerate(idsB.keys()):
         # TODO:: replace the 0 with actual confidence
         subtaskbenglish[id] = [labell2strB(predictionsB[i]), 0]
 
@@ -183,28 +205,19 @@ for name, ids, json_file, true, pred in zip(
     [y_train_stance, y_val_stance, y_test_stance],
     [train_preds, val_preds, test_preds],
 ):
-    trees, tree_pred, tree_label = branch2treelabelsStance(ids, true, pred, json_file)
 
-    mse = mean_squared_error(tree_label, tree_pred, squared=False)
+    trees, tree_pred = branch2treelabelsStance(ids, pred)
 
-    f1 = f1_score(tree_label, tree_pred, labels=np.unique(tree_pred), average="macro")
+    X, Y = genXY(tree_pred, json_file["subtaskaenglish"])
+
+    mse = mean_squared_error(Y, X, squared=False)
+
+    f1 = f1_score(Y, X, labels=np.unique(X), average="macro")
 
     if name == "Test set":
-        predictionsA = tree_pred
+        predictionsA = X
 
-    # m = MultiLabelBinarizer().fit(true)
-    #
-    # if name == "Test set":
-    #     print(m.transform(true))
-    #
-    # if name == "Test set":
-    #     print(m.transform(pred))
-    #
-    # f1 = f1_score(
-    #     m.transform(true), m.transform(pred), labels=np.unique(pred), average="macro"
-    # )
-
-    # acc = accuracy_score(true, pred)
+    # acc = accuracy_score(Y, X)
     print(
         "#-----------------------------------------------------------------------------"
     )
@@ -267,7 +280,12 @@ for name, true, pred in zip(
 # print("%s: %.2f%%" % (stance_model.metrics_names[1], score[1]*100))
 confidenceB = []
 answer = convertsave_competitionformat(
-    twt_ids_test, predictionsA, ids_test, predictionsB, confidenceB, temp_save=True
+    TEST_DATA_LABELS["subtaskaenglish"],
+    predictionsA,
+    TEST_DATA_LABELS["subtaskbenglish"],
+    predictionsB,
+    confidenceB,
+    temp_save=True,
 )
 
 with open("tempAnswers.json", "r") as f:

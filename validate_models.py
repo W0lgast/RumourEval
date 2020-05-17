@@ -10,7 +10,7 @@ from sklearn.metrics import (
     accuracy_score,
     mean_squared_error,
 )
-from branch2treelabels import branch2treelabelsStance
+from branch2treelabels import branch2treelabelsStance, branch2treelabelsVeracity
 import numpy as np
 import os
 import pickle as pkl
@@ -19,14 +19,18 @@ import json
 # -------------------------------------------------------------------------------------
 
 
-def genXY(pred_dict, label_dict):
+def genXY(pred_dict, label_dict, task="A"):
 
     X = []
     Y = []
-    for label in label_dict.keys():
-
-        X.append(convertTaskAtoNumber(pred_dict[label]))
-        Y.append(convertTaskAtoNumber(label_dict[label]))
+    if task == "A":
+        for label in label_dict["subtaskaenglish"].keys():
+            X.append(convertTaskAtoNumber(pred_dict[label]))
+            Y.append(convertTaskAtoNumber(label_dict[label]))
+    else:
+        for label in label_dict["subtaskbenglish"].keys():
+            X.append(pred_dict[label])
+            Y.append(convertTaskBtoNumber(label_dict[label]))
 
     return X, Y
 
@@ -40,6 +44,16 @@ def convertTaskAtoNumber(label):
         return 2
     elif label == "query":
         return 3
+
+
+def convertTaskBtoNumber(label):
+
+    if label == "true":
+        return 0
+    elif label == "false":
+        return 1
+    elif label == "unverified":
+        return 2
 
 
 def baseline_printout(f1_pred=None, f1_base=None, mse_pred=None, mse_base=None):
@@ -238,17 +252,23 @@ print(
 
 ### TESTING VERACITY MODEL (PART B)
 
-train_preds = veracity_model.predict_classes(x_train)
-val_preds = veracity_model.predict_classes(x_val)
-test_preds = veracity_model.predict_classes(x_test)
+train_preds = veracity_model.predict(x_train)
+val_preds = veracity_model.predict(x_val)
+test_preds = veracity_model.predict(x_test)
 
-for name, true, pred in zip(
+for name, ids, json_file, true, pred in zip(
     ["Training set", "val set", "Test set"],
+    [ids_train, ids_dev, ids_test],
+    [TRAIN_DATA_LABELS, VAL_DATA_LABELS, TEST_DATA_LABELS],
     [y_train_veracity, y_val_veracity, y_test_veracity],
     [train_preds, val_preds, test_preds],
 ):
 
-    mse = mean_squared_error(true, pred, squared=False)
+    trees, tree_pred = branch2treelabelsVeracity(ids, pred)
+
+    X, Y = genXY(tree_pred, json_file, task="B")
+
+    mse = mean_squared_error(Y, X[:][0], squared=False)
     f1 = f1_score(true, pred, labels=np.unique(pred), average="macro")
     acc = accuracy_score(true, pred)
 

@@ -25,7 +25,7 @@ import numpy as np
 from sklearn.neural_network import MLPClassifier
 from sklearn.naive_bayes import MultinomialNB
 from ultraEnsemble import TaskBEnsemble
-
+import pandas as pd
 
 from sklearn.gaussian_process.kernels import RBF
 from sklearn.gaussian_process import GaussianProcessClassifier
@@ -162,8 +162,21 @@ for i in range(len(test_BOW_features)):
 
 ##############################   MODELS GO HERE   ##############################
 if not opts.sklearn:
+    ## This line instantiates the model.
+    rf = RandomForestClassifier(n_estimators=5000, n_jobs=-1)
+    ## Fit the model on your training data.
+    rf.fit(X, Y)
+    feature_importances = pd.DataFrame(rf.feature_importances_,
+                                       index= [str(i) for i in range(len(X[0]))],
+                                       columns=['importance']).sort_values('importance', ascending=False)
+    #features = list(feature_importances[0:1500].index)
+    features = list(range(len(X[0])))
+    X = np.array(X)[:, np.array([int(f) for f in features])]
+    X_dev = np.array(X_dev)[:, np.array([int(f) for f in features])]
+    X_test = np.array(X_test)[:, np.array([int(f) for f in features])]
+
     # BASELINE
-    # clf = LinearSVC(random_state=364)
+    #clf = LinearSVC(random_state=364)
 
     # clf = SVC(kernel="sigmoid", random_state=364)
 
@@ -182,6 +195,8 @@ if not opts.sklearn:
 
     clf.fit(X, Y)
     clf.fit_ensemble(X, Y)
+
+    print(feature_importances)
 
 # Only used if running sklearn
 def benchmark(clf):

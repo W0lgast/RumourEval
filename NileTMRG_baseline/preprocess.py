@@ -176,12 +176,72 @@ def get_features(all_data, whichset="training"):
         deny_stanceratio = float(d) / ntweets
         question_stanceratio = float(q) / ntweets
 
+        #### loop through replies, find number of upvotes of support, deny, query
+        if 'favorite_count' in conversation['source'].keys():
+            fav_count_source = conversation['source']['favorite_count']
+        else:
+            fav_count_source = conversation['source']['data']['children'][0]['data']['score']
+        comment_up_count = 0
+        query_up_count = 0
+        support_up_count = 0
+        deny_up_count = 0
+        for reply in conversation['replies']:
+            if 'id' in reply.keys():
+                key = 'id'
+            else: key = 'id_str'
+            reply_stance = stance_labels[str(reply[key])]
+
+            if reply_stance == "comment":
+                if 'favorite_count' in reply.keys():
+                    comment_up_count += reply['favorite_count']
+                elif 'score' in reply['data'].keys():
+                    comment_up_count += reply['data']['score']
+            elif reply_stance == "query":
+                if 'favorite_count' in reply.keys():
+                    query_up_count += reply['favorite_count']
+                elif 'score' in reply['data'].keys():
+                    query_up_count += reply['data']['score']
+            elif reply_stance == "support":
+                if 'favorite_count' in reply.keys():
+                    support_up_count += reply['favorite_count']
+                elif 'score' in reply['data'].keys():
+                    support_up_count += reply['data']['score']
+            elif reply_stance == "deny":
+                if 'favorite_count' in reply.keys():
+                    deny_up_count += reply['favorite_count']
+                elif 'score' in reply['data'].keys():
+                    deny_up_count += reply['data']['score']
+            else:
+                print("UNKNOWN STANCE!")
+                exit(0)
+
+            comment_up_count = max(comment_up_count/max(fav_count_source,1),0)
+            query_up_count = max(query_up_count/max(fav_count_source,1),0)
+            deny_up_count = deny_up_count/max(fav_count_source,1)
+            support_up_count = support_up_count/max(fav_count_source,1)
+            if deny_up_count<0 and support_up_count<0:
+                deny_up_count = 0
+                support_up_count = 0
+            elif deny_up_count < 0:
+                support_up_count = support_up_count - deny_up_count
+                deny_up_count = 0
+            elif support_up_count < 0:
+                deny_up_count = deny_up_count - support_up_count
+                support_up_count = 0
+
+            num_replies = len(conversation['replies'])/max(fav_count_source,1)
+
         extra_feats = [
             hashash,
             hasurl,
             support_stanceratio,
             deny_stanceratio,
             question_stanceratio,
+            #comment_up_count,
+            #query_up_count,
+            #deny_up_count,
+            #support_up_count,
+            #num_replies
         ]
 
         all_extra_feats.append(extra_feats)

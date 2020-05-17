@@ -25,6 +25,7 @@ import numpy as np
 from sklearn.neural_network import MLPClassifier
 from sklearn.naive_bayes import MultinomialNB
 from ultraEnsemble import TaskBEnsemble
+from sklearn.decomposition import PCA
 
 
 from sklearn.gaussian_process.kernels import RBF
@@ -180,8 +181,16 @@ if not opts.sklearn:
 
     clf = TaskBEnsemble(random_state=364)
 
-    clf.fit(X, Y)
-    clf.fit_ensemble(X, Y)
+    pca = PCA(n_components=10, random_state=364)
+    #X_tr_pca = pca.fit_transform(X=X)
+    X_tr_pca = X
+    #X_va_pca = pca.transform(X_dev)
+    X_va_pca = X_dev
+    #X_te_pca = pca.transform(X_test)
+    X_te_pca = X_test
+
+    clf.fit(X_tr_pca, Y)
+    clf.fit_ensemble(X_tr_pca, Y)
 
 # Only used if running sklearn
 def benchmark(clf):
@@ -189,12 +198,12 @@ def benchmark(clf):
     print("Training: ")
     print(clf)
     t0 = time()
-    clf.fit(X, Y)
+    clf.fit(X_tr_pca, Y)
     train_time = time() - t0
     print("train time: %0.3fs" % train_time)
 
     t0 = time()
-    pred = clf.predict(X_dev)
+    pred = clf.predict(X_va_pca)
     test_time = time() - t0
     print("test time:  %0.3fs" % test_time)
 
@@ -217,7 +226,7 @@ def benchmark(clf):
 ###########################   PREDICTIONS GO HERE   ###########################
 
 if not opts.sklearn:
-    Y_pred = clf.predict(X)
+    Y_pred = clf.predict(X_tr_pca)
 
     # get scores
     print("Train Accuracy:")
@@ -230,7 +239,7 @@ if not opts.sklearn:
     # print(metrics.mean_squared_error([convertTaskBtoNumber(y) for y in Y],
     #                                 [convertTaskBtoNumber(y) for y in Y_pred], squared=False))
 
-    Y_dev_pred = clf.predict(X_dev)
+    Y_dev_pred = clf.predict(X_va_pca)
 
     # get scores
     print("Validation Accuracy:")
@@ -243,7 +252,7 @@ if not opts.sklearn:
     # print(metrics.mean_squared_error([convertTaskBtoNumber(y) for y in Y_dev],
     #                                 [convertTaskBtoNumber(y) for y in Y_dev_pred], squared=False))
 
-    Y_pred = clf.predict(X_test)
+    Y_pred = clf.predict(X_te_pca)
 
     # get scores
     print("Testing Accuracy:")

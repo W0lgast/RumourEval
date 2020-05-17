@@ -19,6 +19,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import VotingClassifier
 from nltk.classify.scikitlearn import SklearnClassifier
 from sklearn.calibration import CalibratedClassifierCV
+from sklearn.feature_selection import SelectFromModel
 
 # -------------------------------------------------------------------------------------
 
@@ -31,6 +32,7 @@ from sklearn.calibration import CalibratedClassifierCV
 
 class TaskBEnsemble(object):
     def __init__(self, random_state=364):
+        self._transformer = None
         self._models = [
             MultinomialNB(),
             DecisionTreeClassifier(random_state=random_state),

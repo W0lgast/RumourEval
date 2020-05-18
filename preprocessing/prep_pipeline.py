@@ -21,6 +21,8 @@ from keras.preprocessing.sequence import pad_sequences
 import json
 import pickle as pkl
 
+with open('../task_b_extra_features.json', 'r') as fp:
+    TASK_B_EXTRA_FEATURES = json.load(fp)
 
 #%%
 with open("../data/test/final-eval-key.json", 'r') as f:
@@ -73,6 +75,15 @@ def prep_pipeline(dataset="RumEval2019", feature_set=["avgw2v"]):
 
             thread_feature_dict = extract_thread_features_incl_response(conversation)
 
+            for an_id in thread_feature_dict.keys():
+                if an_id in TASK_B_EXTRA_FEATURES.keys():
+                    extra_feats = TASK_B_EXTRA_FEATURES[an_id]
+                else:
+                    print("not implemented yet, whatevers happening might be really bad")
+                feat_dict = {str(i): e_f for i, e_f in enumerate(extra_feats)}
+                thread_feature_dict[an_id].update(feat_dict)
+            #dd here
+            #TASK_B_EXTRA_FEATURES
             if fold == "test":
                 # if it's in the test set it wont have veracity, assign it.
                 conversation['veracity'] = TEST_DATA_LABELS["subtaskbenglish"][conversation['id']]
@@ -86,7 +97,7 @@ def prep_pipeline(dataset="RumEval2019", feature_set=["avgw2v"]):
                 thread_stance_labels,
                 branches,
             ) = transform_feature_dict(
-                thread_feature_dict, conversation, feature_set=feature_set
+                thread_feature_dict, conversation, feature_set=feature_set+[str(i) for i in range(len(extra_feats))]
             )
 
             fold_stance_labels.extend(thread_stance_labels)

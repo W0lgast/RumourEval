@@ -7,19 +7,17 @@ import numpy
 
 def parameter_search(ntrials, objective_function, task):
 
-    search_space = {'num_dense_layers': hp.choice('nlayers', [1, 2]),
-                    'num_dense_units': hp.choice('num_dense', [200, 300,
-                                                               400, 500]),
-                    'num_epochs': hp.choice('num_epochs',  [100, 50]),
-                    'num_lstm_units': hp.choice('num_lstm_units', [100, 200,
-                                                                   300]),
-                    'num_lstm_layers': hp.choice('num_lstm_layers', [1, 2]),
-                    'learn_rate': hp.choice('learn_rate', [1e-4, 3e-4, 1e-3]),
-                    'mb_size': hp.choice('mb_size', [32, 64]),
-                    'l2reg': hp.choice('l2reg', [0.0, 1e-4, 3e-4, 1e-3]),
+    search_space = {'num_dense_layers': hp.choice('nlayers', [2]),
+                    'num_dense_units': hp.choice('num_dense', [400]),
+                    'num_epochs': hp.choice('num_epochs',  [50]),
+                    'num_lstm_units': hp.choice('num_lstm_units', [300]),
+                    'num_lstm_layers': hp.choice('num_lstm_layers', [2]),
+                    'learn_rate': hp.choice('learn_rate', [1e-4]),
+                    'mb_size': hp.choice('mb_size', [32]),
+                    'l2reg': hp.choice('l2reg', [3e-4]),
                     'rng_seed': hp.choice('rng_seed', [364])
                     }
-    
+
     trials = Trials()
     best = fmin(objective_function,
                 space=search_space,

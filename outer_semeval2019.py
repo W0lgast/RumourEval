@@ -84,7 +84,7 @@ def convertsave_competitionformat(
 #%%
 print("Rumour Stance classification")
 
-ntrials = 100
+ntrials = 1
 task = "stance"
 paramsA, trialsA = parameter_search(
     ntrials, objective_function_stance_branchLSTM_RumEv, task
@@ -100,12 +100,12 @@ print(accuracy_score(dev_result_label, dev_result_predictions))
 print(f1_score(dev_result_label, dev_result_predictions, average="macro"))
 
 #%%
-test_result_id, test_result_predictions = evaluation_function_stance_branchLSTM_RumEv(
-    paramsA
-)
+# test_result_id, test_result_predictions = evaluation_function_stance_branchLSTM_RumEv(
+#     paramsA
+# )
 #%%
 print("Rumour Veracity classification")
-ntrials = 100
+ntrials = 1
 task = "veracity"
 paramsB, trialsB = parameter_search(
     ntrials, objective_function_veracity_branchLSTM_RumEv, task
@@ -133,10 +133,10 @@ print(f1_score(dev_result_labelB, dev_result_predictionsB, average="macro"))
 #%%
 # convertsave_competitionformat(dev_result_id, dev_result_predictions, dev_result_idB, dev_result_predictionsB,confidenceB )
 
-a = convertsave_competitionformat(
-    test_result_id,
-    test_result_predictions,
-    test_result_idB,
-    test_result_predictionsB,
-    confidenceB,
-)
+# a = convertsave_competitionformat(
+#     test_result_id,
+#     test_result_predictions,
+#     test_result_idB,
+#     test_result_predictionsB,
+#     confidenceB,
+# )

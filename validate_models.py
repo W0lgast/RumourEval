@@ -18,6 +18,8 @@ import json
 
 # -------------------------------------------------------------------------------------
 
+with open('task_b_extra_features.json', 'r') as fp:
+    TASK_B_EXTRA_FEATURES = json.load(fp)
 
 def genXY(pred_dict, label_dict, task="A"):
 
@@ -204,51 +206,51 @@ ids_dev = np.load(os.path.join(path, "dev/ids.npy"), allow_pickle=True)
 ids_test = np.load(os.path.join(path, "test/ids.npy"), allow_pickle=True)
 
 ### TESTING STANCE MODEL (PART A)
-train_preds = stance_model.predict_classes(x_train)
-val_preds = stance_model.predict_classes(x_val)
-test_preds = stance_model.predict_classes(x_test)
-
+# train_preds = stance_model.predict_classes(x_train)
+# val_preds = stance_model.predict_classes(x_val)
+# test_preds = stance_model.predict_classes(x_test)
+#
 predictionsA = []
-predictionsB = []
-confidenceB = []
-
-for name, ids, json_file, true, pred in zip(
-    ["Training set", "val set", "Test set"],
-    [twt_ids_train, twt_ids_dev, twt_ids_test],
-    [TRAIN_DATA_LABELS, VAL_DATA_LABELS, TEST_DATA_LABELS],
-    [y_train_stance, y_val_stance, y_test_stance],
-    [train_preds, val_preds, test_preds],
-):
-
-    trees, tree_pred = branch2treelabelsStance(ids, pred)
-
-    X, Y = genXY(tree_pred, json_file["subtaskaenglish"])
-
-    mse = mean_squared_error(Y, X, squared=False)
-
-    f1 = f1_score(Y, X, labels=np.unique(X), average="macro")
-
-    if name == "Test set":
-        predictionsA = X
-
-    # acc = accuracy_score(Y, X)
-    print(
-        "#-----------------------------------------------------------------------------"
-    )
-    print(f"A - STANCE: CALCULATING FOR {name.upper()}")
-    if name == "Test set":
-        f1base = 0.4929
-        print(
-            f"A - STANCE: F1 score is {f1}: EXPECTED BASELINE ON TEST: 0.4929 {baseline_printout(f1_pred=f1, f1_base=f1base)}"
-        )
-    else:
-        print(f"A - STANCE: F1 score is {f1}")
-    # print("A - STANCE: RMSE is " + str(mse))
-    # print("A - STANCE: Accuracy is " + str(acc))
-
-print(
-    "#-----------------------------------------------------------------------------\n"
-)
+# predictionsB = []
+# confidenceB = []
+#
+# for name, ids, json_file, true, pred in zip(
+#     ["Training set", "val set", "Test set"],
+#     [twt_ids_train, twt_ids_dev, twt_ids_test],
+#     [TRAIN_DATA_LABELS, VAL_DATA_LABELS, TEST_DATA_LABELS],
+#     [y_train_stance, y_val_stance, y_test_stance],
+#     [train_preds, val_preds, test_preds],
+# ):
+#
+#     trees, tree_pred = branch2treelabelsStance(ids, pred)
+#
+#     X, Y = genXY(tree_pred, json_file["subtaskaenglish"])
+#
+#     mse = mean_squared_error(Y, X, squared=False)
+#
+#     f1 = f1_score(Y, X, labels=np.unique(X), average="macro")
+#
+#     if name == "Test set":
+#         predictionsA = X
+#
+#     # acc = accuracy_score(Y, X)
+#     print(
+#         "#-----------------------------------------------------------------------------"
+#     )
+#     print(f"A - STANCE: CALCULATING FOR {name.upper()}")
+#     if name == "Test set":
+#         f1base = 0.4929
+#         print(
+#             f"A - STANCE: F1 score is {f1}: EXPECTED BASELINE ON TEST: 0.4929 {baseline_printout(f1_pred=f1, f1_base=f1base)}"
+#         )
+#     else:
+#         print(f"A - STANCE: F1 score is {f1}")
+#     # print("A - STANCE: RMSE is " + str(mse))
+#     # print("A - STANCE: Accuracy is " + str(acc))
+#
+# print(
+#     "#-----------------------------------------------------------------------------\n"
+# )
 
 ### TESTING VERACITY MODEL (PART B)
 

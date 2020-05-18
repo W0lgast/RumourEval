@@ -94,6 +94,13 @@ def get_features(all_data, whichset="training"):
             if tw["entities"]["urls"] != []:
                 hasurl = 1
 
+        elif 'data' in tw.keys():
+            if 'children' in tw['data'].keys():
+                nn = tw['data']['children'][0]
+                url = nn['data']['url']
+                if istweet(url, str):
+                    hasurl = 1
+
         s = 0
         d = 0
         q = 0
@@ -232,6 +239,12 @@ def get_features(all_data, whichset="training"):
 
             num_replies = len(conversation['replies']) / max(fav_count_source, 1)
 
+        src = conversation['source']
+        if 'data' in src.keys():
+            istweet = 0
+        else:
+            istweet = 1
+
         extra_feats = [
             hashash,
             hasurl,
@@ -244,6 +257,8 @@ def get_features(all_data, whichset="training"):
             # support_up_count,
             # num_replies
         ]
+
+        conversation['source']['user']
 
         all_extra_feats.append(extra_feats)
 

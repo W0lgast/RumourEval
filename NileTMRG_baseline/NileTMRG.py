@@ -283,13 +283,18 @@ if not opts.sklearn:
 
     # print(confusion_matrix(Y_test, Y_pred))
     y_test_probs_ensemble = clf.predict(X_te_pca, proba=True)
+    ensemble_probs = np.array([y[[1,0,2]] for y in y_test_probs_ensemble])
     y_test_proba_branchlstm = pkl.load(open("../branch_lstm_test_preds.pkl", "rb"))
     branch_probas = np.array(list(y_test_proba_branchlstm.values()))
 
-    ensemble_weight = 1
-    branch_weight = 0.0
+    prior = [0.75,1,1]
+    branch_probas = [b_p * prior for b_p in branch_probas]
+    ensemble_probs = [b_p * prior for b_p in ensemble_probs]
+
+    ensemble_weight = 0.99
+    branch_weight = 0.01
     new_probas = np.add(
-        np.multiply(y_test_probs_ensemble, ensemble_weight),
+        np.multiply(ensemble_probs, ensemble_weight),
         np.multiply(branch_probas, branch_weight)
     )
     new_preds = np.argmax(new_probas, axis=1)

@@ -197,7 +197,7 @@ def get_features(all_data, whichset="training"):
             fav_count_source = conversation["source"]["data"]["children"][0]["data"][
                 "score"
             ]
-        comment_up_count = 0
+        comment_up_count = 1000
         query_up_count = 0
         support_up_count = 0
         deny_up_count = 0

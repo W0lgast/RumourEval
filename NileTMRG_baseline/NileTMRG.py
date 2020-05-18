@@ -305,8 +305,6 @@ if not opts.sklearn:
 
     print("Testing Macro F:")
     print(metrics.f1_score([convertTaskBtoNumber(o) for o in Y_test], new_preds, average="macro"))
-
-    print("o")
 ##
 
 if opts.sklearn:

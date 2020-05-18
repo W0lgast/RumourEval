@@ -98,8 +98,9 @@ def get_features(all_data, whichset="training"):
             if 'children' in tw['data'].keys():
                 nn = tw['data']['children'][0]
                 url = nn['data']['url']
-                if istweet(url, str):
-                    hasurl = 1
+                if isinstance(url, str):
+                    reddit_url = url
+                    #hasurl = 1
 
         s = 0
         d = 0
@@ -196,6 +197,12 @@ def get_features(all_data, whichset="training"):
         query_up_count = 0
         support_up_count = 0
         deny_up_count = 0
+        src = conversation['source']
+        if 'data' in src.keys():
+            istweet = -1
+        else:
+            istweet = 1
+
         for reply in conversation["replies"]:
             if "id" in reply.keys():
                 key = "id"
@@ -227,27 +234,24 @@ def get_features(all_data, whichset="training"):
                 print("UNKNOWN STANCE!")
                 exit(0)
 
-            comment_up_count = max(comment_up_count / max(fav_count_source, 1), 0)
-            query_up_count = max(query_up_count / max(fav_count_source, 1), 0)
-            deny_up_count = deny_up_count / max(fav_count_source, 1)
-            support_up_count = support_up_count / max(fav_count_source, 1)
-            if deny_up_count < 0 and support_up_count < 0:
-                deny_up_count = 0
-                support_up_count = 0
-            elif deny_up_count < 0:
-                support_up_count = support_up_count - deny_up_count
-                deny_up_count = 0
-            elif support_up_count < 0:
-                deny_up_count = deny_up_count - support_up_count
-                support_up_count = 0
+            #comment_up_count = max(comment_up_count / max(fav_count_source, 1), 0)
+            #query_up_count = max(query_up_count / max(fav_count_source, 1), 0)
+            #deny_up_count = deny_up_count / max(fav_count_source, 1)
+            #support_up_count = support_up_count / max(fav_count_source, 1)
+            num_replies = len(conversation["replies"]) #/ max(fav_count_source, 1)
+            cur = comment_up_count/max(query_up_count+deny_up_count+support_up_count,1)
+            qur = query_up_count/max(comment_up_count+deny_up_count+support_up_count,1)
+            dur = deny_up_count/max(query_up_count+comment_up_count+support_up_count,1)
+            sur = support_up_count/max(comment_up_count+query_up_count+deny_up_count,1)
 
-            num_replies = len(conversation["replies"]) / max(fav_count_source, 1)
-
-        src = conversation['source']
-        if 'data' in src.keys():
-            istweet = 0
-        else:
-            istweet = 1
+        try:
+            favs = conversation['source']['favorite_count']
+            megafavs = conversation['source']['retweet_count']/10
+            upr = -1
+        except:
+            upr = conversation['source']['data']['children'][0]['data']['upvote_ratio']
+            favs = conversation['source']['data']['children'][0]['data']['ups']
+            megafavs = conversation['source']['data']['children'][0]['data']['gilded']
 
         extra_feats = [
             hashash,
@@ -255,14 +259,17 @@ def get_features(all_data, whichset="training"):
             support_stanceratio,
             deny_stanceratio,
             question_stanceratio,
-            # comment_up_count,
-            # query_up_count,
-            # deny_up_count,
-            # support_up_count,
-            # num_replies,
+            istweet,
+            cur,
+            qur,
+            dur,
+            sur,
+            favs,
+            megafavs,
+            upr,
+            num_replies,
+            fav_count_source
         ]
-
-        conversation['source']['user']
 
         all_extra_feats.append(extra_feats)
 

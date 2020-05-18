@@ -10,7 +10,7 @@ from sklearn.metrics import (
     accuracy_score,
     mean_squared_error,
 )
-from branch2treelabels import branch2treelabelsStance, branch2treelabelsVeracity
+from branch2treelabels import branch2treelabelsStance, branch2treelabelsVeracity, branch2treelabelsVeracityProba
 import numpy as np
 import os
 import pickle as pkl
@@ -309,14 +309,14 @@ for name, ids, json_file, true, pred in zip(
 # score = stance_model.evaluate(x_test, y_test, verbose=0)
 # print("%s: %.2f%%" % (stance_model.metrics_names[1], score[1]*100))
 
-answer = convertsave_competitionformat(
-    TEST_DATA_LABELS["subtaskaenglish"],
-    predictionsA,
-    TEST_DATA_LABELS["subtaskbenglish"],
-    predictionsB,
-    confidenceB,
-    temp_save=True,
-)
+# answer = convertsave_competitionformat(
+#     TEST_DATA_LABELS["subtaskaenglish"],
+#     predictionsA,
+#     TEST_DATA_LABELS["subtaskbenglish"],
+#     predictionsB,
+#     confidenceB,
+#     temp_save=True,
+# )
 
 with open("tempAnswers.json", "r") as f:
     predicted = json.load(f)
@@ -351,5 +351,8 @@ if Bdiff != 0:
         print(f"\nYou have {Adiff} extra values in Task B (Veracity)...")
 
 print()
+
+probas = branch2treelabelsVeracityProba(ids_test , test_preds)
+pkl.dump( probas[1], open( "branch_lstm_test_preds.pkl", "wb" ) )
 
 exit(0)

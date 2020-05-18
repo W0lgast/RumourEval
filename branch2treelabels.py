@@ -66,6 +66,28 @@ def branch2treelabelsVeracity(ids_test, y_pred):
 
     return trees, predictions
 
+def branch2treelabelsVeracityProba(ids_test, y_pred):
+    trees = np.unique(ids_test)
+
+    predictions = {}
+
+    for tree in trees:
+
+        treeindx = [i for i, x in enumerate(ids_test) if x == tree]
+
+        treeVals = [x for x in ids_test if x == tree]
+
+        for i, thread in enumerate(treeVals):
+            pred = np.argmax(y_pred[treeindx[i]])
+            # print(f"thred:{thread}")
+            # print(f"pred:{pred}")
+            # print(f"y_pred[treeindx[i]][j]:{y_pred[treeindx[i]]}")
+            # print(f"y_pred[treeindx[i]][j][pred]:{y_pred[treeindx[i]][pred]}")
+            #predictions[str(thread)] = [y_pred[treeindx[i]][pred]]
+            predictions[str(thread)] = y_pred[treeindx[i]]
+
+    return trees, predictions
+
 
 def branch2treelabels(ids_test, y_test, y_pred, confidence):
     trees = np.unique(ids_test)

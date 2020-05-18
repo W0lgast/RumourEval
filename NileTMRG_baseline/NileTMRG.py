@@ -27,7 +27,7 @@ from sklearn.naive_bayes import MultinomialNB
 from ultraEnsemble import TaskBEnsemble
 from sklearn.decomposition import PCA
 from sklearn.decomposition import LatentDirichletAllocation
-
+import pickle as pkl
 
 from sklearn.gaussian_process.kernels import RBF
 from sklearn.gaussian_process import GaussianProcessClassifier
@@ -282,7 +282,26 @@ if not opts.sklearn:
     #                                 [convertTaskBtoNumber(y) for y in Y_pred], squared=False))
 
     # print(confusion_matrix(Y_test, Y_pred))
+    y_test_probs_ensemble = clf.predict(X_te_pca, proba=True)
+    y_test_proba_branchlstm = pkl.load(open("../branch_lstm_test_preds.pkl", "rb"))
+    branch_probas = np.array(list(y_test_proba_branchlstm.values()))
 
+    ensemble_weight = 1
+    branch_weight = 0.0
+    new_probas = np.add(
+        np.multiply(y_test_probs_ensemble, ensemble_weight),
+        np.multiply(branch_probas, branch_weight)
+    )
+    new_preds = np.argmax(new_probas, axis=1)
+    # get scores
+    print("MIXING BRANCH AND ENSEMBLE")
+    print("Testing Accuracy:")
+    print(metrics.accuracy_score([convertTaskBtoNumber(o) for o in Y_test], new_preds))
+
+    print("Testing Macro F:")
+    print(metrics.f1_score([convertTaskBtoNumber(o) for o in Y_test], new_preds, average="macro"))
+
+    print("o")
 ##
 
 if opts.sklearn:

@@ -81,7 +81,7 @@ class TaskBEnsemble(object):
         ensemble.fit(X, Y)
         self.__ensemble_model.append(ensemble)
 
-    def predict(self, X):
+    def predict(self, X, proba=False):
         preds = []
         for model in self._models:
             preds.append(model.predict(X))
@@ -99,5 +99,9 @@ class TaskBEnsemble(object):
             # will always pick first element if there are ties
             ret.append(highest_votes[0])
 
-        return self.__ensemble_model[0].predict(X)
+        ensemble =  self.__ensemble_model[0]
+        if proba==False:
+            return ensemble.predict(X)
+        elif proba==True:
+            return ensemble.predict_proba(X)
         # return ret

@@ -34,15 +34,16 @@ class TaskBEnsemble(object):
     def __init__(self, random_state=364):
         self._transformer = None
         self._models = [
-            MultinomialNB(),
+            # MultinomialNB(),
             DecisionTreeClassifier(random_state=random_state),
             SVC(kernel="sigmoid", random_state=random_state, probability=True),
-            #LinearSVC(random_state=random_state),
+            # LinearSVC(random_state=random_state),
             CalibratedClassifierCV(
                 base_estimator=LinearSVC(random_state=random_state),
-                method='isotonic', cv=None  # your CV instance
+                method="isotonic",
+                cv=None,  # your CV instance
             ),
-            #SklearnClassifier(SVC(kernel='linear', probability=True, random_state=random_state)),
+            # SklearnClassifier(SVC(kernel='linear', probability=True, random_state=random_state)),
             MLPClassifier(
                 hidden_layer_sizes=tuple([100] * 20),
                 max_iter=1000,

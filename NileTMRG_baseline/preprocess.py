@@ -101,7 +101,7 @@ def get_features(all_data, whichset="training"):
         if whichset == "testing":
 
             submission_file = (
-                #"../data/test/final-eval-key.json" # these are the true answers
+                # "../data/test/final-eval-key.json" # these are the true answers
                 "../tempAnswers.json"
             )
             submission_full = json.load(open(submission_file, "r"))
@@ -122,8 +122,10 @@ def get_features(all_data, whichset="training"):
                 elif submission[repl["id_str"]] == "query":
                     q = q + 1
 
-            #kmf: addition here, might be an error
-            conversation['veracity'] = submission_full["subtaskbenglish"][conversation['id']]
+            # kmf: addition here, might be an error
+            conversation["veracity"] = submission_full["subtaskbenglish"][
+                conversation["id"]
+            ]
 
         elif whichset == "development":
 
@@ -177,41 +179,43 @@ def get_features(all_data, whichset="training"):
         question_stanceratio = float(q) / ntweets
 
         #### loop through replies, find number of upvotes of support, deny, query
-        if 'favorite_count' in conversation['source'].keys():
-            fav_count_source = conversation['source']['favorite_count']
+        if "favorite_count" in conversation["source"].keys():
+            fav_count_source = conversation["source"]["favorite_count"]
         else:
-            fav_count_source = conversation['source']['data']['children'][0]['data']['score']
+            fav_count_source = conversation["source"]["data"]["children"][0]["data"][
+                "score"
+            ]
         comment_up_count = 0
         query_up_count = 0
         support_up_count = 0
         deny_up_count = 0
-        for reply in conversation['replies']:
-            if 'id' in reply.keys():
-                key = 'id'
+        for reply in conversation["replies"]:
+            if "id" in reply.keys():
+                key = "id"
             else:
-                key = 'id_str'
+                key = "id_str"
             reply_stance = stance_labels[str(reply[key])]
 
             if reply_stance == "comment":
-                if 'favorite_count' in reply.keys():
-                    comment_up_count += reply['favorite_count']
-                elif 'score' in reply['data'].keys():
-                    comment_up_count += reply['data']['score']
+                if "favorite_count" in reply.keys():
+                    comment_up_count += reply["favorite_count"]
+                elif "score" in reply["data"].keys():
+                    comment_up_count += reply["data"]["score"]
             elif reply_stance == "query":
-                if 'favorite_count' in reply.keys():
-                    query_up_count += reply['favorite_count']
-                elif 'score' in reply['data'].keys():
-                    query_up_count += reply['data']['score']
+                if "favorite_count" in reply.keys():
+                    query_up_count += reply["favorite_count"]
+                elif "score" in reply["data"].keys():
+                    query_up_count += reply["data"]["score"]
             elif reply_stance == "support":
-                if 'favorite_count' in reply.keys():
-                    support_up_count += reply['favorite_count']
-                elif 'score' in reply['data'].keys():
-                    support_up_count += reply['data']['score']
+                if "favorite_count" in reply.keys():
+                    support_up_count += reply["favorite_count"]
+                elif "score" in reply["data"].keys():
+                    support_up_count += reply["data"]["score"]
             elif reply_stance == "deny":
-                if 'favorite_count' in reply.keys():
-                    deny_up_count += reply['favorite_count']
-                elif 'score' in reply['data'].keys():
-                    deny_up_count += reply['data']['score']
+                if "favorite_count" in reply.keys():
+                    deny_up_count += reply["favorite_count"]
+                elif "score" in reply["data"].keys():
+                    deny_up_count += reply["data"]["score"]
             else:
                 print("UNKNOWN STANCE!")
                 exit(0)
@@ -230,7 +234,7 @@ def get_features(all_data, whichset="training"):
                 deny_up_count = deny_up_count - support_up_count
                 support_up_count = 0
 
-            num_replies = len(conversation['replies']) / max(fav_count_source, 1)
+            num_replies = len(conversation["replies"]) / max(fav_count_source, 1)
 
         extra_feats = [
             hashash,
@@ -242,7 +246,7 @@ def get_features(all_data, whichset="training"):
             # query_up_count,
             # deny_up_count,
             # support_up_count,
-            # num_replies
+            # num_replies,
         ]
 
         all_extra_feats.append(extra_feats)

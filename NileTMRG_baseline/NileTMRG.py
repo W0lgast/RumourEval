@@ -26,6 +26,7 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.naive_bayes import MultinomialNB
 from ultraEnsemble import TaskBEnsemble
 from sklearn.decomposition import PCA
+from sklearn.decomposition import LatentDirichletAllocation
 
 
 from sklearn.gaussian_process.kernels import RBF
@@ -39,6 +40,22 @@ def convertTaskBtoNumber(label):
         return 1
     elif label == "unverified":
         return 2
+
+
+def dimredDataSplit(BOW, extra_features, redALG):
+
+    X = []
+    if redALG != []:
+        convertedBOW = redALG.transform(BOW)
+    else:
+        convertedBOW = BOW
+
+    for i, sample in enumerate(convertedBOW):
+
+        line = list(sample) + extra_features[i]
+        X.append(line)
+
+    return X
 
 
 ####
@@ -86,17 +103,12 @@ op.add_option(
     "headers, signatures, and quoting.",
 )
 
-
-def is_interactive():
-    return not hasattr(sys.modules["__main__"], "__file__")
-
-
 # work-around for Jupyter notebook and IPython console
-argv = [] if is_interactive() else sys.argv[1:]
+argv = sys.argv[1:]
 (opts, args) = op.parse_args(argv)
-if len(args) > 0:
-    op.error("this script takes no arguments.")
-    sys.exit(1)
+# if len(args) > 0:
+#     op.error("this script takes no arguments.")
+#     sys.exit(1)
 
 print(__doc__)
 op.print_help()
@@ -112,15 +124,20 @@ BOW_sents, all_extra_feats, Y, ids = get_features(all_data, whichset="training")
 
 cv = CountVectorizer()
 
+
 cv_fit = cv.fit_transform(BOW_sents)
 
 BOW_features = cv_fit.toarray()
 
+dimRed = []
+# UNCOMMENT FOR NO DIMENSIONALITY REDUCTION
+dimRed = PCA(n_components=46, random_state=364)
+dimRed.fit(BOW_features)
+
 # Append features
 X = []
-for i in range(len(BOW_features)):
-    line = list(BOW_features[i]) + all_extra_feats[i]
-    X.append(line)
+X_orig = []
+X = np.array(dimredDataSplit(BOW_features, all_extra_feats, dimRed))
 
 ### DEV ###
 # Get BOW
@@ -133,10 +150,7 @@ dev_cv = cv.transform(BOW_sents_dev)
 BOW_features_dev = dev_cv.toarray()
 
 # Append features
-X_dev = []
-for i in range(len(BOW_features_dev)):
-    line = list(BOW_features_dev[i]) + all_extra_feats_dev[i]
-    X_dev.append(line)
+X_dev = np.array(dimredDataSplit(BOW_features_dev, all_extra_feats_dev, dimRed))
 
 # scale
 # scl = StandardScaler()
@@ -154,10 +168,7 @@ test_cv_fit = cv.transform(test_BOW_sents)
 test_BOW_features = test_cv_fit.toarray()
 
 # Append features
-X_test = []
-for i in range(len(test_BOW_features)):
-    line = list(test_BOW_features[i]) + test_all_extra_feats[i]
-    X_test.append(line)
+X_test = np.array(dimredDataSplit(test_BOW_features, test_all_extra_feats, dimRed))
 
 # X_test = scl.transform(X_test)
 
@@ -181,12 +192,13 @@ if not opts.sklearn:
 
     clf = TaskBEnsemble(random_state=364)
 
-    pca = PCA(n_components=10, random_state=364)
-    #X_tr_pca = pca.fit_transform(X=X)
+    # pca = PCA(n_components=10, random_state=364)
+    # pca = LatentDirichletAllocation(n_components=150, n_jobs=-1, random_state=55)
+    # X_tr_pca = pca.fit_transform(X=X)
     X_tr_pca = X
-    #X_va_pca = pca.transform(X_dev)
+    # X_va_pca = pca.transform(X_dev)
     X_va_pca = X_dev
-    #X_te_pca = pca.transform(X_test)
+    # X_te_pca = pca.transform(X_test)
     X_te_pca = X_test
 
     clf.fit(X_tr_pca, Y)
@@ -261,6 +273,10 @@ if not opts.sklearn:
     print("Testing Macro F:")
     print(metrics.f1_score(Y_test, Y_pred, average="macro"))
 
+    # with open(f"pca.txt", "a") as myfile:
+    #     myfile.write(
+    #         f"{sys.argv[1]}) A:{metrics.accuracy_score(Y_test, Y_pred)}, F1:{metrics.f1_score(Y_test, Y_pred, average='macro')}\n"
+    #     )
     # print("Testing RMSE:")
     # print(metrics.mean_squared_error([convertTaskBtoNumber(y) for y in Y_test],
     #                                 [convertTaskBtoNumber(y) for y in Y_pred], squared=False))

@@ -19,7 +19,7 @@ from preprocessing_reddit import load_data
 def get_features(all_data, whichset="training"):
 
     tknzr = TweetTokenizer(reduce_len=True)
-
+    extra_features_to_save = {}
     # Can join train and dev
 
     if whichset == "training":
@@ -33,6 +33,9 @@ def get_features(all_data, whichset="training"):
 
     elif whichset == "training+development":
         training_set = all_data["train"] + all_data["dev"]
+
+    elif whichset == "all":
+        training_set = all_data["train"] + all_data["dev"]+all_data['test']
 
     BOW_sents = []
     all_extra_feats = []
@@ -156,7 +159,8 @@ def get_features(all_data, whichset="training"):
                 elif submission[repl["id_str"]] == "query":
                     q = q + 1
 
-        Y.append(conversation["veracity"])
+        if 'veracity' in conversation.keys():
+            Y.append(conversation["veracity"])
 
         tweet_label_dict, _ = load_true_labels()
 
@@ -182,9 +186,9 @@ def get_features(all_data, whichset="training"):
                 q = q + 1
 
         ntweets = len(conversation["replies"]) + 1
-        support_stanceratio = float(s) / ntweets
-        deny_stanceratio = float(d) / ntweets
-        question_stanceratio = float(q) / ntweets
+        support_stanceratio = float(s)*2 / ntweets
+        deny_stanceratio = float(d)*2 / ntweets
+        question_stanceratio = float(q)*2 / ntweets
 
         #### loop through replies, find number of upvotes of support, deny, query
         if "favorite_count" in conversation["source"].keys():
@@ -246,7 +250,7 @@ def get_features(all_data, whichset="training"):
 
         try:
             favs = conversation['source']['favorite_count']
-            megafavs = conversation['source']['retweet_count']/10
+            megafavs = conversation['source']['retweet_count']/5
             upr = -1
         except:
             upr = conversation['source']['data']['children'][0]['data']['upvote_ratio']
@@ -266,13 +270,16 @@ def get_features(all_data, whichset="training"):
             sur,
             favs,
             megafavs,
-            upr,
+            #upr,
             num_replies,
             fav_count_source
         ]
 
+        extra_features_to_save[conversation['id']] = extra_feats
         all_extra_feats.append(extra_feats)
-
+    if whichset=='all':
+        with open('task_b_extra_features.json', 'w') as fp:
+            json.dump(extra_features_to_save, fp)
     return BOW_sents, all_extra_feats, Y, ids
 
 

@@ -131,7 +131,7 @@ BOW_features = cv_fit.toarray()
 
 dimRed = []
 # UNCOMMENT FOR NO DIMENSIONALITY REDUCTION
-dimRed = PCA(n_components=46, random_state=364)
+dimRed = PCA(n_components=10, random_state=364)
 dimRed.fit(BOW_features)
 
 # Append features

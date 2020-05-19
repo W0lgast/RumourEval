@@ -119,14 +119,13 @@ lib64/
 lib64
 share/
 pyvenv.cfg
-*.zip
 .idea/
 etc/
 
 # Project specific stuff
-data/*
+data/GoogleNews-vectors-negative300.bin
+preprocessing/saved_dataRumEval2019
 nltk_data/
-preprocessing/saved_dataRumEval2019/
 
 # Spyder project settings
 .spyderproject
